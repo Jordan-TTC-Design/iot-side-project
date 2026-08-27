@@ -313,6 +313,7 @@ footer a{color:var(--ink-2);}
   <ol>
     <li><a href="#note-01"><span class="n">01</span><span>HelloCardputer</span></a></li>
     <li><a href="#note-02"><span class="n">02</span><span>SpriteDemo</span></a></li>
+    <li><a href="#note-03"><span class="n">03</span><span>TextInput</span></a></li>
   </ol>
   <h4>附錄</h4>
   <ol>
@@ -985,6 +986,53 @@ canvas.pushSprite(0, 0);           // ← 只有這行碰硬體，一次覆蓋�
 <h4>實測數字</h4>
 <figure class="code"><pre><code>Sketch uses 518123 bytes (39%)
 Global variables use 26332 bytes (8%), leaving 301348 bytes</code></pre></figure>
+</section>
+<section class="lesson" id="note-03">
+  <div class="lesson-head"><span class="num">03</span><h3>實作紀錄 · <code class="inl">TextInput/</code></h3></div>
+  <p>打字、退格（Del）、清空（Tab）、送出（Enter）。上方累積送出過的內容，游標每 500ms 閃一次。</p>
+<h4>燒錄</h4>
+<figure class="code"><figcaption>bash</figcaption><pre><code>make flash SKETCH=TextInput</code></pre></figure>
+<h4>三個 API，記住就夠</h4>
+<figure class="code"><figcaption>cpp</figcaption><pre><code>M5Cardputer.Keyboard.isChange()    // 這一輪跟上一輪不同 → 等同 watch()
+M5Cardputer.Keyboard.isPressed()   // 現在有沒有鍵被按著
+M5Cardputer.Keyboard.keysState()   // 拿到「按了什麼」</code></pre></figure>
+<p><code class="inl">keysState()</code> 回傳 <code class="inl">Keyboard_Class::KeysState</code>，完整定義在 <code class="inl">~/Documents/Arduino/libraries/M5Cardputer/src/utility/Keyboard/Keyboard.h:77</code>：</p>
+<div class="tablewrap"><table><thead><tr><th>欄位</th><th>型別</th><th>內容</th></tr></thead><tbody><tr><td><code class="inl">word</code></td><td><code class="inl">vector&lt;char&gt;</code></td><td>可見字元，<strong>包含空白</strong>（<code class="inl">Keyboard.cpp:186</code> 註解寫明 including space）</td></tr><tr><td><code class="inl">hid_keys</code></td><td><code class="inl">vector&lt;uint8_t&gt;</code></td><td>原始 HID 鍵碼</td></tr><tr><td><code class="inl">del</code> <code class="inl">enter</code> <code class="inl">tab</code> <code class="inl">space</code></td><td><code class="inl">bool</code></td><td>這些鍵是不是被按了</td></tr><tr><td><code class="inl">fn</code> <code class="inl">ctrl</code> <code class="inl">shift</code> <code class="inl">opt</code> <code class="inl">alt</code></td><td><code class="inl">bool</code></td><td>修飾鍵狀態</td></tr><tr><td><code class="inl">modifiers</code></td><td><code class="inl">uint8_t</code></td><td>修飾鍵位元遮罩</td></tr></tbody></table></div>
+<p><strong>為什麼 <code class="inl">word</code> 是陣列不是單一字元</strong>：鍵盤矩陣可以同時偵測多鍵，一次 update 可能拿到好幾個字。</p>
+<h4>事件 vs 狀態</h4>
+<p><code class="inl">isChange()</code> 是效能與正確性的關鍵。沒有它，按著一個鍵不放會每圈迴圈重複加入同一個字 —— 它讓「按下」只觸發一次，等於防彈跳（debounce）。</p>
+<p><strong>但遊戲不能用它。</strong> 要連續移動改用狀態查詢：</p>
+<figure class="code"><figcaption>cpp</figcaption><pre><code>if (M5Cardputer.Keyboard.isKeyPressed('a')) player.x -= 2;   // 按著就一直動</code></pre></figure>
+<p>輸入框要事件，遊戲要狀態。</p>
+<h4>踩過的坑：<code class="inl">st</code> 的作用域</h4>
+<p>原本想在 <code class="inl">loop()</code> 裡加清空功能，寫成這樣 —— <strong>編譯不過</strong>：</p>
+<figure class="code"><figcaption>cpp</figcaption><pre><code>bool poll() {
+  auto st = M5Cardputer.Keyboard.keysState();   // st 只活在這對 {} 裡
+  ...
+}                                                // ← 到這裡就消失了
+
+void loop() {
+  if (st.tab) input.value = "";   // ✗ 編譯器不認識 st
+}</code></pre></figure>
+<p>C++ 沒有 JS 的 hoisting 或閉包，變數活在宣告它的那對大括號內，離開就沒了。</p>
+<p>正解是放進 <code class="inl">poll()</code> —— 而且<strong>本來就該放那裡</strong>：清空是輸入框自己的行為，不是外面的事。 「行為跟資料放在一起」這個原則，之後寫電子琴、電子雞都適用。</p>
+<h4>踩過的坑：燒不進去</h4>
+<p>改完之後燒錄失敗：</p>
+<figure class="code"><pre><code>A fatal error occurred: Failed to connect to ESP32-S3: No serial data received.</code></pre></figure>
+<p>診斷過程與結論：</p>
+<div class="tablewrap"><table><thead><tr><th>檢查</th><th>指令</th><th>這次的結果</th></tr></thead><tbody><tr><td>有沒有程序搶埠</td><td><code class="inl">lsof /dev/cu.usbmodem*</code></td><td>有殘留 esptool，<code class="inl">pkill -f esptool</code> 清掉</td></tr><tr><td>裝置在不在</td><td><code class="inl">ls /dev/cu.usbmodem*</code></td><td>在</td></tr><tr><td>USB 描述符</td><td><code class="inl">system_profiler SPUSBDataType</code></td><td>Espressif <code class="inl">303a:1001</code> USB JTAG/serial debug unit</td></tr><tr><td>換連線策略</td><td>`esptool --before no-reset\</td><td>usb-reset read-mac`</td><td>三種全失敗 → 晶片不在 bootloader</td></tr></tbody></table></div>
+<p><strong>真正的解法是手動進下載模式</strong>，而且順序要嚴格：</p>
+<p>1. 拔掉 USB-C，等 3 秒 2. 電源開關撥 <strong>OFF</strong> 3. <strong>先按住 G0 不放</strong> 4. 保持按著，插上 USB-C 5. 等 2 秒才放開 G0</p>
+<p><strong>兩個教訓：</strong></p>
+<ul class="pts"><li><strong>不要兩個人同時跑 <code class="inl">make flash</code></strong> —— 兩個 esptool 搶同一個埠必定失敗。</li><li><strong>進了下載模式就直接燒，不要先探測。</strong> <code class="inl">esptool read-mac</code> 結束時預設會 <code class="inl">Hard resetting</code>， 等於把機器踢出下載模式，白費剛做的手動步驟。真要診斷就加 <code class="inl">--after no-reset</code>。</li></ul>
+<p>平常不用這樣是因為 ESP32-S3 的原生 USB 能靠 DTR/RTS 自動重置，但這要靠當時執行中的韌體 正常在跑 USB CDC。裝置狀態一亂就會失效，手動下載模式是繞過韌體、直接從硬體層進 bootloader 的萬用解。</p>
+<h4>可以動手改</h4>
+<div class="tablewrap"><table><thead><tr><th>改什麼</th><th>怎麼做</th></tr></thead><tbody><tr><td>密碼模式</td><td>render 時把 <code class="inl">input.value</code> 換成等長的 <code class="inl">*</code></td></tr><tr><td>上一則歷史</td><td>存 <code class="inl">lastSubmitted</code>，按 <code class="inl">fn</code> 時填回 <code class="inl">input.value</code></td></tr><tr><td>多行編輯</td><td><code class="inl">history</code> 改成可編輯，用 <code class="inl">fn</code> + 上下鍵選行</td></tr></tbody></table></div>
+<h4>實測數字</h4>
+<figure class="code"><pre><code>Sketch uses 518667 bytes (39%)
+Global variables use 26420 bytes (8%), leaving 301260 bytes</code></pre></figure>
+<h4>之後會用到</h4>
+<p><code class="inl">TextInput</code> 這個 struct 可以整段複製走 —— 它只做三件事：吃按鍵、維護 <code class="inl">value</code>、Enter 時回傳 true。 第 06 課填 WiFi 密碼、第 07 課電子雞取名字都會用到。</p>
 </section>
 
 <section class="panel" id="map" style="margin-top:38px;">

@@ -14,6 +14,7 @@ if (!SRC || !existsSync(SRC)) { console.error('用法: node scripts/build-docs.m
 const LESSONS = [
   { dir: 'HelloCardputer', num: '01' },
   { dir: 'SpriteDemo',     num: '02' },
+  { dir: 'TextInput',      num: '03' },
 ]
 
 const notes = LESSONS

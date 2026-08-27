@@ -11,8 +11,8 @@ M5Stack Cardputer ADV（ESP32-S3）的自學紀錄。
 | 01 | [`HelloCardputer/`](HelloCardputer/) | 環境、螢幕、序列埠 | ✅ 已燒錄 |
 | 01+ | [`scripts/`](scripts/) | 命令列重建環境 | ✅ |
 | 02 | [`SpriteDemo/`](SpriteDemo/) | Sprite 雙緩衝 | ✅ 已燒錄 |
-| 03 | — | 鍵盤輸入框 | ⬜ 下一課 |
-| 04 | — | 主迴圈與狀態機 | ⬜ |
+| 03 | [`TextInput/`](TextInput/) | 鍵盤輸入框 | ✅ 已燒錄 |
+| 04 | — | 主迴圈與狀態機 | ⬜ 下一課 |
 | 05 | — | 聲音 → 電子琴 | ⬜ |
 | 06 | — | 連網 → Claude 額度記錄器 | ⬜ |
 | 07 | — | 存檔與時間 → 電子雞 | ⬜ |

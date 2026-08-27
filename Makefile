@@ -3,7 +3,7 @@ CLI    := /Applications/Arduino IDE.app/Contents/Resources/app/lib/backend/resou
 CFG    := $(HOME)/.arduinoIDE/arduino-cli.yaml
 FQBN   := m5stack:esp32:m5stack_cardputer
 PORT   ?= /dev/cu.usbmodem101
-SKETCH ?= HelloCardputer
+SKETCH ?= TextInput
 ROADMAP ?= /private/tmp/claude-501/-Users-jordan-code-iot/51873ada-11de-47ac-8d31-60277002428e/scratchpad/cardputer-roadmap.html
 
 .PHONY: build flash monitor ports setup docs
