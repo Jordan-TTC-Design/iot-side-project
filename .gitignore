@@ -1,0 +1,29 @@
+# ---- 機密：絕對不能進版控 ----
+# 第 06 課的 WiFi 帳密與 bridge 網址放這，範本見 secrets.example.h
+secrets.h
+**/secrets.h
+.env
+.env.*
+
+# ---- 編譯產出 ----
+# Arduino IDE「匯出已編譯的二進位檔」會在 sketch 資料夾產生 build/
+build/
+**/build/
+*.bin
+*.elf
+*.map
+*.hex
+
+# ---- PlatformIO（第 04 課之後可能會用到）----
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# ---- 由 make docs 產生，不需要進版控 ----
+docs/.artifact-fragment.html
+
+# ---- 編輯器與系統 ----
+.DS_Store
+.vscode/
+.idea/
+*.swp

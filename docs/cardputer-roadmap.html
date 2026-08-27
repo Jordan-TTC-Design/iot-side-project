@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="給網頁開發者的 M5Stack Cardputer ADV 自學路線圖">
+<title>Cardputer 上手路線圖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+
+<style>
+:root{
+  --paper:#F4F2EE;
+  --surface:#FFFFFF;
+  --surface-2:#EDEAE4;
+  --ink:#16130F;
+  --ink-2:#5B544B;
+  --ink-3:#8B8378;
+  --rule:#DCD6CB;
+  --accent:#D9501A;
+  --accent-soft:#FBE7DD;
+  --teal:#0E6E6B;
+  --teal-soft:#DDEDEB;
+  --code-bg:#15120E;
+  --code-ink:#E8E2D6;
+  --code-dim:#8A8172;
+  --shadow:0 1px 0 rgba(22,19,15,.04), 0 12px 28px -20px rgba(22,19,15,.35);
+
+  --font-display:"Archivo","Noto Sans TC",system-ui,sans-serif;
+  --font-body:"Archivo","Noto Sans TC",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141210;
+    --surface:#1C1917;
+    --surface-2:#242019;
+    --ink:#F2EEE7;
+    --ink-2:#A9A093;
+    --ink-3:#7C7466;
+    --rule:#332E27;
+    --accent:#FF7C48;
+    --accent-soft:#3A2016;
+    --teal:#4FC3B8;
+    --teal-soft:#12302E;
+    --code-bg:#0E0C0A;
+    --code-ink:#E8E2D6;
+    --code-dim:#7A7264;
+    --shadow:0 1px 0 rgba(0,0,0,.3), 0 14px 30px -22px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141210;
+  --surface:#1C1917;
+  --surface-2:#242019;
+  --ink:#F2EEE7;
+  --ink-2:#A9A093;
+  --ink-3:#7C7466;
+  --rule:#332E27;
+  --accent:#FF7C48;
+  --accent-soft:#3A2016;
+  --teal:#4FC3B8;
+  --teal-soft:#12302E;
+  --code-bg:#0E0C0A;
+  --code-ink:#E8E2D6;
+  --code-dim:#7A7264;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 14px 30px -22px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.85;
+  letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--teal);text-underline-offset:3px;text-decoration-thickness:1px;}
+a:hover{color:var(--accent);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px;}
+h1,h2,h3,h4{font-family:var(--font-display);text-wrap:balance;margin:0;line-height:1.35;}
+
+.wrap{max-width:1200px;margin:0 auto;padding:0 28px;}
+
+/* ---------- header ---------- */
+.masthead{border-bottom:1px solid var(--rule);padding:56px 0 40px;}
+.eyebrow{
+  font-family:var(--font-mono);font-size:11px;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin:0 0 18px;
+}
+h1{font-size:clamp(34px,6vw,58px);font-weight:900;letter-spacing:-.02em;line-height:1.12;}
+.lede{max-width:60ch;color:var(--ink-2);font-size:17px;margin:20px 0 0;}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;}
+.chip{
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.04em;
+  border:1px solid var(--rule);border-radius:999px;padding:4px 12px;color:var(--ink-2);
+  background:var(--surface);
+}
+
+/* ---------- keycap motif ---------- */
+.motif{margin-top:38px;}
+.keygrid{display:grid;grid-template-columns:repeat(14,1fr);gap:5px;max-width:520px;}
+.kc{
+  aspect-ratio:1/.86;border-radius:4px;background:var(--surface);
+  border:1px solid var(--rule);border-bottom-width:2px;
+  display:grid;place-items:center;
+  font-family:var(--font-mono);font-size:9px;color:var(--ink-3);
+}
+.kc.hot{background:var(--accent);border-color:var(--accent);color:#fff;}
+.kc.warm{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
+.motif figcaption{
+  font-family:var(--font-mono);font-size:11px;color:var(--ink-3);
+  margin-top:12px;letter-spacing:.03em;
+}
+
+/* ---------- layout ---------- */
+.shell{display:grid;grid-template-columns:212px minmax(0,1fr);gap:56px;padding:44px 0 90px;align-items:start;}
+nav.toc{position:sticky;top:24px;font-size:13.5px;}
+nav.toc h4{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 12px;font-weight:500;
+}
+nav.toc ol{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:2px;}
+nav.toc a{
+  display:flex;gap:9px;text-decoration:none;color:var(--ink-2);
+  padding:3px 0;line-height:1.5;
+}
+nav.toc a:hover{color:var(--accent);}
+nav.toc .n{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);padding-top:2px;}
+
+main{min-width:0;display:flex;flex-direction:column;gap:14px;}
+
+/* ---------- stage divider ---------- */
+.stage{
+  display:flex;align-items:baseline;gap:14px;
+  margin:38px 0 4px;padding-bottom:10px;border-bottom:2px solid var(--ink);
+}
+.stage:first-child{margin-top:0;}
+.stage .tag{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);
+}
+.stage h2{font-size:22px;font-weight:800;letter-spacing:-.01em;}
+.stage .est{margin-left:auto;font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3);white-space:nowrap;}
+
+/* ---------- lesson ---------- */
+.lesson{
+  background:var(--surface);border:1px solid var(--rule);border-radius:10px;
+  padding:26px 28px 28px;box-shadow:var(--shadow);
+}
+.lesson-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:6px;}
+.num{
+  font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--accent);
+  background:var(--accent-soft);border-radius:5px;padding:3px 8px;flex:none;margin-top:4px;
+  letter-spacing:.04em;
+}
+.lesson h3{font-size:20px;font-weight:800;letter-spacing:-.01em;flex:1;}
+.lesson p{margin:12px 0;color:var(--ink-2);max-width:66ch;}
+.lesson p strong{color:var(--ink);font-weight:600;}
+.goal{
+  font-size:14px;color:var(--ink);background:var(--surface-2);
+  border-radius:7px;padding:10px 14px;margin:14px 0 0;display:flex;gap:10px;
+}
+.goal b{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--accent);
+  text-transform:uppercase;flex:none;padding-top:4px;}
+ul.pts{margin:14px 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;}
+ul.pts li{padding-left:20px;position:relative;color:var(--ink-2);font-size:15px;}
+ul.pts li::before{
+  content:"";position:absolute;left:4px;top:.72em;width:6px;height:6px;
+  border-radius:1px;background:var(--accent);
+}
+ul.pts li b{color:var(--ink);font-weight:600;}
+
+/* ---------- code ---------- */
+figure.code{margin:16px 0;border-radius:8px;overflow:hidden;background:var(--code-bg);border:1px solid var(--rule);}
+figure.code figcaption{
+  font-family:var(--font-mono);font-size:11px;color:var(--code-dim);
+  padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.07);letter-spacing:.04em;
+}
+pre{margin:0;padding:14px 16px;overflow-x:auto;}
+pre code{
+  font-family:var(--font-mono);font-size:12.5px;line-height:1.75;color:var(--code-ink);
+  white-space:pre;
+}
+.cm{color:var(--code-dim);}
+.kw{color:#F0916A;}
+.st{color:#9CC49A;}
+code.inl{
+  font-family:var(--font-mono);font-size:.87em;background:var(--teal-soft);color:var(--teal);
+  padding:1px 5px;border-radius:4px;
+}
+
+/* ---------- callouts ---------- */
+.note{
+  border-left:3px solid var(--teal);background:var(--teal-soft);
+  border-radius:0 7px 7px 0;padding:12px 16px;margin:16px 0;font-size:14.5px;color:var(--ink);
+}
+.note.warn{border-left-color:var(--accent);background:var(--accent-soft);}
+.note b{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  display:block;margin-bottom:4px;color:var(--teal);}
+.note.warn b{color:var(--accent);}
+.note p{margin:0;color:inherit;}
+.note p + p{margin-top:8px;}
+
+/* ---------- tables ---------- */
+.tablewrap{overflow-x:auto;margin:18px 0;border:1px solid var(--rule);border-radius:8px;background:var(--surface);}
+table{border-collapse:collapse;width:100%;font-size:14px;}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top;}
+th{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--surface-2);
+}
+tr:last-child td{border-bottom:none;}
+td.mono,.mono{font-family:var(--font-mono);font-size:12.5px;font-variant-numeric:tabular-nums;}
+td b{font-weight:600;}
+
+/* ---------- pin chips ---------- */
+.pin{
+  display:inline-block;font-family:var(--font-mono);font-size:11px;
+  background:var(--surface-2);border:1px solid var(--rule);border-bottom-width:2px;
+  border-radius:4px;padding:0 6px;color:var(--ink-2);margin-right:3px;line-height:1.7;
+}
+
+/* ---------- appendix ---------- */
+.panel{
+  background:var(--surface);border:1px solid var(--rule);border-radius:10px;
+  padding:26px 28px;box-shadow:var(--shadow);
+}
+.panel h3{font-size:19px;font-weight:800;margin-bottom:4px;}
+.panel p{color:var(--ink-2);margin:12px 0;max-width:66ch;}
+
+footer{border-top:1px solid var(--rule);padding:28px 0 60px;color:var(--ink-3);font-size:13px;}
+footer a{color:var(--ink-2);}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;gap:24px;}
+  nav.toc{position:static;border-bottom:1px solid var(--rule);padding-bottom:18px;}
+  nav.toc ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+  .wrap{padding:0 18px;}
+  .lesson{padding:22px 18px 24px;}
+  .keygrid{gap:3px;}
+  .kc{font-size:0;}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+<style>
+  html{-webkit-text-size-adjust:100%;}
+  img,svg{max-width:100%;height:auto;}
+  .backlink{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3);
+    border-bottom:1px solid var(--rule);padding:10px 0;letter-spacing:.03em;}
+  .backlink a{color:var(--ink-2);}
+  .lesson h4{font-size:15px;font-weight:700;margin:18px 0 0;color:var(--ink);}
+  .lesson h5{font-size:14px;font-weight:600;margin:14px 0 0;color:var(--ink-2);}
+</style>
+</head>
+<body>
+<div class="wrap"><p class="backlink">本機副本 · 線上版：<a href="https://claude.ai/code/artifact/8003f878-2f24-44a3-a981-83d522e1f10a">claude.ai/code/artifact/8003f878</a></p></div>
+
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">M5Stack Cardputer ADV · ESP32-S3</p>
+    <h1>Cardputer 上手路線圖</h1>
+    <p class="lede">
+      給已經會寫 Nuxt / Node.js、但第一次碰韌體的人。十二堂課，從「插上去會亮」一路到你自己的電子琴、
+      Claude 額度儀表板、電子雞與外接相機。每一課都有明確產出，順著做完就是一台屬於你的機器。
+    </p>
+    <div class="meta-row">
+      <span class="chip">語言 · Arduino C++</span>
+      <span class="chip">函式庫 · M5Cardputer + M5Unified</span>
+      <span class="chip">工具 · Arduino IDE → PlatformIO</span>
+      <span class="chip">後端 · 你原本的 Node.js</span>
+    </div>
+
+    <figure class="motif">
+      <div class="keygrid" aria-hidden="true">
+        <span class="kc">`</span><span class="kc">1</span><span class="kc">2</span><span class="kc">3</span><span class="kc">4</span><span class="kc">5</span><span class="kc">6</span><span class="kc">7</span><span class="kc">8</span><span class="kc">9</span><span class="kc">0</span><span class="kc">-</span><span class="kc">=</span><span class="kc">del</span>
+        <span class="kc">tab</span><span class="kc">q</span><span class="kc">w</span><span class="kc">e</span><span class="kc">r</span><span class="kc">t</span><span class="kc">y</span><span class="kc">u</span><span class="kc">i</span><span class="kc">o</span><span class="kc">p</span><span class="kc">[</span><span class="kc">]</span><span class="kc">\</span>
+        <span class="kc">fn</span><span class="kc">shf</span><span class="kc">a</span><span class="kc warm">s</span><span class="kc warm">d</span><span class="kc">f</span><span class="kc warm">g</span><span class="kc warm">h</span><span class="kc warm">j</span><span class="kc">k</span><span class="kc">l</span><span class="kc">;</span><span class="kc">'</span><span class="kc">ent</span>
+        <span class="kc">ctl</span><span class="kc">opt</span><span class="kc">alt</span><span class="kc hot">z</span><span class="kc hot">x</span><span class="kc hot">c</span><span class="kc hot">v</span><span class="kc hot">b</span><span class="kc hot">n</span><span class="kc hot">m</span><span class="kc">,</span><span class="kc">.</span><span class="kc">/</span><span class="kc">spc</span>
+      </div>
+      <figcaption>4 × 14 = 56 鍵。第 05 課會把橘色這兩排變成一個八度的鋼琴鍵盤。</figcaption>
+    </figure>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="shell">
+
+<nav class="toc" aria-label="課程目錄">
+  <h4>路線</h4>
+  <ol>
+    <li><a href="#why"><span class="n">△</span><span>為什麼選這條路</span></a></li>
+    <li><a href="#l00"><span class="n">00</span><span>認識機器與救磚</span></a></li>
+    <li><a href="#l01"><span class="n">01</span><span>環境與 Hello</span></a></li>
+    <li><a href="#l01b"><span class="n">01+</span><span>命令列重建環境</span></a></li>
+    <li><a href="#l02"><span class="n">02</span><span>畫面與 Sprite</span></a></li>
+    <li><a href="#l03"><span class="n">03</span><span>鍵盤輸入</span></a></li>
+    <li><a href="#l04"><span class="n">04</span><span>主迴圈與狀態機</span></a></li>
+    <li><a href="#l05"><span class="n">05</span><span>聲音 → 電子琴</span></a></li>
+    <li><a href="#l06"><span class="n">06</span><span>連網 → 額度記錄器</span></a></li>
+    <li><a href="#l07"><span class="n">07</span><span>存檔與時間 → 電子雞</span></a></li>
+    <li><a href="#l08"><span class="n">08</span><span>IMU、紅外線、電量</span></a></li>
+    <li><a href="#l09"><span class="n">09</span><span>打包進 Launcher</span></a></li>
+    <li><a href="#l10"><span class="n">10</span><span>外接相機</span></a></li>
+    <li><a href="#l11"><span class="n">11</span><span>讓 Claude 幫你寫</span></a></li>
+  </ol>
+  <h4>實作紀錄</h4>
+  <ol>
+    <li><a href="#note-01"><span class="n">01</span><span>HelloCardputer</span></a></li>
+    <li><a href="#note-02"><span class="n">02</span><span>SpriteDemo</span></a></li>
+  </ol>
+  <h4>附錄</h4>
+  <ol>
+    <li><a href="#map"><span class="n">◇</span><span>Nuxt ↔ Arduino 對照</span></a></li>
+    <li><a href="#spec"><span class="n">◇</span><span>硬體速查表</span></a></li>
+    <li><a href="#ram"><span class="n">◇</span><span>記憶體預算</span></a></li>
+    <li><a href="#links"><span class="n">◇</span><span>資源連結</span></a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section class="panel" id="why">
+  <h3>為什麼是 Arduino C++，不是 MicroPython</h3>
+  <p>
+    Cardputer ADV 官方支援四種開發方式：Arduino、PlatformIO、ESP-IDF、UIFlow2（圖形化）。
+    以你的目標——電子琴要吃 I2S 音訊、額度記錄器要連網、相機要處理影像——建議直接鎖定
+    <strong>Arduino 框架 + M5Cardputer 函式庫</strong>，理由很實際：
+  </p>
+  <ul class="pts">
+    <li><b>硬體驅動都在這裡。</b>ES8311 音訊編解碼器、TCA8418 鍵盤控制器、BMI270 六軸、ST7789V2 螢幕，官方 M5Unified 全部包好了。MicroPython / UIFlow2 對 ADV 的新硬體支援一定落後。</li>
+    <li><b>社群範例幾乎全是 C++。</b>你之後想抄的 Cardputer 專案（遊戲、駭客工具、時鐘）九成用 Arduino 寫。</li>
+    <li><b>ESP32 沒有 PSRAM 的餘裕給直譯器。</b>ADV 只有 512KB SRAM，Python 直譯器加 WiFi 協定堆疊會很快撞牆。</li>
+    <li><b>PlatformIO 的體驗跟你熟的一模一樣。</b><code class="inl">platformio.ini</code> 就是 <code class="inl">package.json</code>，<code class="inl">lib_deps</code> 就是 dependencies，一行指令編譯燒錄。</li>
+  </ul>
+  <p>
+    但你的 Node.js 完全不會浪費——反而是關鍵。這份路線圖的架構一直是
+    <strong>裝置只負責顯示與輸入，資料與邏輯留在你 Mac 上的 Node 服務</strong>。
+    第 06 課的 Claude 額度記錄器就是這個模式的示範。
+  </p>
+</section>
+
+<div class="stage">
+  <span class="tag">階段 0</span>
+  <h2>先讓它動起來</h2>
+  <span class="est">約 1 小時</span>
+</div>
+
+<section class="lesson" id="l00">
+  <div class="lesson-head"><span class="num">00</span><h3>認識手上這台機器，先買好救磚保險</h3></div>
+  <p>
+    在寫任何一行程式之前，先確定你「隨時可以回到出廠狀態」。這件事做完，後面所有實驗你都不會害怕。
+  </p>
+  <ul class="pts">
+    <li><b>裝 M5Burner。</b>M5Stack 官方燒錄工具，裡面可以直接下載並燒回 Launcher 或原廠韌體。之後不管你把機器搞成什麼樣，插上 USB-C 燒一次就回來了。</li>
+    <li><b>練熟下載模式。</b>側邊電源開關撥到 <span class="pin">OFF</span> → 按住機身上的 <span class="pin">G0</span> 按鈕 → 插上 USB-C → 放開。這是每次燒錄卡住時的萬用解法。</li>
+    <li><b>準備一張 microSD。</b>格式化成 FAT32（不是 exFAT）。Launcher 和之後的資料存檔都靠它。</li>
+    <li><b>認識它沒有什麼。</b>沒有觸控、沒有 PSRAM、沒有獨立 RTC 晶片、沒有相機。這三個「沒有」會影響你後面的設計決策。</li>
+  </ul>
+  <div class="goal"><b>產出</b><span>你能在 30 秒內把機器燒回 Launcher，並且知道下載模式怎麼進。</span></div>
+</section>
+
+<section class="lesson" id="l01">
+  <div class="lesson-head"><span class="num">01</span><h3>開發環境：先用 Arduino IDE 拿到成就感</h3></div>
+  <p>
+    我建議<strong>第一天先用 Arduino IDE 2.x</strong>，因為 M5 官方文件全部以它為準，出問題比較好查。
+    等你跑通 Hello World、確認硬體沒問題之後，第 04 課再搬到 PlatformIO。
+  </p>
+  <ul class="pts">
+    <li>Arduino IDE → 偏好設定 → 額外開發板管理員網址填入 M5Stack 的 <code class="inl">package_m5stack_index.json</code>。</li>
+    <li>開發板管理員搜尋 <b>M5Stack</b>，安裝 <b>3.2.2 以上</b>（低於這版沒有 ADV 的驅動）。</li>
+    <li>開發板選 <b>M5Cardputer</b>（ADV 共用這個選項，不需要另外的 board）。</li>
+    <li>函式庫管理員安裝 <b>M5Cardputer</b>，它會連帶拉進 M5Unified、M5GFX、IRremote。</li>
+  </ul>
+  <figure class="code">
+    <figcaption>HelloCardputer.ino</figcaption>
+<pre><code><span class="kw">#include</span> <span class="st">&lt;M5Cardputer.h&gt;</span>
+
+<span class="kw">void</span> setup() {
+  <span class="kw">auto</span> cfg = M5.config();
+  M5Cardputer.begin(cfg, <span class="kw">true</span>);        <span class="cm">// true = 一併初始化鍵盤</span>
+  M5Cardputer.Display.setRotation(<span class="kw">1</span>);      <span class="cm">// 橫式 240 x 135</span>
+  M5Cardputer.Display.setTextSize(<span class="kw">2</span>);
+  M5Cardputer.Display.fillScreen(TFT_BLACK);
+  M5Cardputer.Display.drawString(<span class="st">"Hello, Cardputer"</span>, <span class="kw">10</span>, <span class="kw">56</span>);
+  Serial.begin(<span class="kw">115200</span>);
+  Serial.println(<span class="st">"booted"</span>);              <span class="cm">// 這就是你的 console.log</span>
+}
+
+<span class="kw">void</span> loop() {
+  M5Cardputer.update();                    <span class="cm">// 每圈都要呼叫，否則按鍵/電源狀態不會更新</span>
+}</code></pre>
+  </figure>
+  <div class="note warn">
+    <b>兩個一定會遇到的坑</b>
+    <p>找不到序列埠 → 十之八九是沒進下載模式，或線是「只能充電」的線。換一條有資料線的 USB-C。</p>
+    <p>燒進去畫面卻是黑的 → 檢查電源開關有沒有撥到 ON，以及 <code class="inl">setRotation(1)</code> 有沒有加。</p>
+  </div>
+  <div class="goal"><b>產出</b><span>螢幕上出現你自己打的字，序列埠監控看得到 <code class="inl">booted</code>。</span></div>
+</section>
+
+<section class="lesson" id="l01b">
+  <div class="lesson-head"><span class="num">01+</span><h3>用命令列重建整套環境</h3></div>
+  <p>
+    上一課在 GUI 裡點的每一步都<strong>沒有留下紀錄</strong>——換一台電腦就得重點一遍，而且會忘記自己裝了哪個版本。
+    好消息是 Arduino IDE 內建了一支 <code class="inl">arduino-cli</code>，前面那三步全部都能用指令做完，而且可以存成腳本。
+  </p>
+  <figure class="code">
+    <figcaption>arduino-cli 的位置（Arduino IDE 內建，不用另外裝）</figcaption>
+<pre><code>/Applications/Arduino IDE.app/Contents/Resources/app/lib/backend/resources/arduino-cli
+
+<span class="cm"># 或裝獨立版，連 Arduino IDE 都不需要：</span>
+brew install arduino-cli</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption>三步安裝的指令版本</figcaption>
+<pre><code>CLI=<span class="st">"/Applications/Arduino IDE.app/Contents/Resources/app/lib/backend/resources/arduino-cli"</span>
+CFG=<span class="st">"$HOME/.arduinoIDE/arduino-cli.yaml"</span>
+
+<span class="cm"># ① 板子來源：直接寫設定檔，不用在偏好設定裡貼</span>
+cat &gt; <span class="st">"$CFG"</span> &lt;&lt;<span class="st">'YAML'</span>
+board_manager:
+    additional_urls:
+        - https://static-cdn.m5stack.com/resource/arduino/package_m5stack_index.json
+YAML
+
+<span class="cm"># ② 板子套件（約 1.5GB，最久的一步）</span>
+<span class="st">"$CLI"</span> --config-file <span class="st">"$CFG"</span> core update-index
+<span class="st">"$CLI"</span> --config-file <span class="st">"$CFG"</span> core install m5stack:esp32@3.3.9
+
+<span class="cm"># ③ 函式庫（會自動拉 M5Unified / M5GFX / IRremote / LibSSH-ESP32）</span>
+<span class="st">"$CLI"</span> --config-file <span class="st">"$CFG"</span> lib update-index
+<span class="st">"$CLI"</span> --config-file <span class="st">"$CFG"</span> lib install <span class="st">"M5Cardputer@1.1.1"</span></code></pre>
+  </figure>
+  <div class="note">
+    <b>已驗證的版本組合</b>
+    <p>板子 <code class="inl">m5stack:esp32 3.3.9</code>（下限 3.2.2）· M5Cardputer <code class="inl">1.1.1</code>（下限 1.1.0）·
+    M5Unified <code class="inl">0.2.21</code>（下限 0.2.8）· M5GFX <code class="inl">0.2.28</code>（下限 0.2.10）。
+    這組實測可以編譯通過。</p>
+  </div>
+  <p><strong>換一台電腦時</strong>，這些都包在專案裡的腳本了，跑一行就好：</p>
+  <figure class="code">
+    <figcaption>scripts/setup-arduino.sh · 可重複執行</figcaption>
+<pre><code>./scripts/setup-arduino.sh</code></pre>
+  </figure>
+  <p>日常開發則走 Makefile，等同你熟的 npm scripts：</p>
+  <figure class="code">
+    <figcaption>Makefile</figcaption>
+<pre><code>make build                       <span class="cm"># 只編譯</span>
+make flash                       <span class="cm"># 編譯並燒錄</span>
+make monitor                     <span class="cm"># 序列埠監控</span>
+make ports                       <span class="cm"># 列出接上的裝置</span>
+
+make flash SKETCH=KeyboardPiano  <span class="cm"># 換一個 sketch</span></code></pre>
+  </figure>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>關鍵值</th><th>內容</th><th>哪裡來的</th></tr></thead>
+    <tbody>
+      <tr><td><b>FQBN</b></td><td class="mono">m5stack:esp32:m5stack_cardputer</td><td class="mono">board listall | grep -i cardputer</td></tr>
+      <tr><td><b>序列埠</b></td><td class="mono">/dev/cu.usbmodem101</td><td class="mono">board list</td></tr>
+      <tr><td><b>設定檔</b></td><td class="mono">~/.arduinoIDE/arduino-cli.yaml</td><td>板子來源網址放這</td></tr>
+      <tr><td><b>套件位置</b></td><td class="mono">~/Library/Arduino15/packages</td><td>約 1.5GB，不要進版控</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note warn">
+    <b>編譯輸出要看這兩個數字</b>
+    <p><code class="inl">Sketch uses 511155 bytes (38%)</code> → flash 用量，上限 1.25MB。<br>
+    <code class="inl">leaving 301732 bytes for local variables</code> → <b>這就是附錄三那張表的實測值</b>，
+    每次編譯都瞄一眼，突然掉很多就是有東西吃掉記憶體了。</p>
+  </div>
+  <div class="goal"><b>產出</b><span>一支 setup 腳本加一個 Makefile，換機器不用重查任何步驟。</span></div>
+</section>
+
+<div class="stage">
+  <span class="tag">階段 1</span>
+  <h2>畫面與輸入：做出「介面」的能力</h2>
+  <span class="est">一個週末</span>
+</div>
+
+<section class="lesson" id="l02">
+  <div class="lesson-head"><span class="num">02</span><h3>顯示：M5GFX 與 Sprite 雙緩衝</h3></div>
+  <p>
+    直接往 <code class="inl">Display</code> 上畫，畫面會閃。正確做法是畫在記憶體裡的
+    <strong>Sprite（離螢幕畫布）</strong>，一次推上去——概念就是 canvas 的雙緩衝，或你熟的 virtual DOM 一次 patch。
+  </p>
+  <figure class="code">
+    <figcaption>sprite 雙緩衝 · 30fps 主迴圈</figcaption>
+<pre><code><span class="kw">#include</span> <span class="st">&lt;M5Cardputer.h&gt;</span>
+
+M5Canvas canvas(&amp;M5Cardputer.Display);
+<span class="kw">uint32_t</span> lastFrame = <span class="kw">0</span>;
+<span class="kw">int</span> x = <span class="kw">0</span>;
+
+<span class="kw">void</span> setup() {
+  <span class="kw">auto</span> cfg = M5.config();
+  M5Cardputer.begin(cfg, <span class="kw">true</span>);
+  M5Cardputer.Display.setRotation(<span class="kw">1</span>);
+  canvas.setColorDepth(<span class="kw">8</span>);            <span class="cm">// 8-bit = 32KB；16-bit 要 63KB，沒 PSRAM 要省著用</span>
+  canvas.createSprite(<span class="kw">240</span>, <span class="kw">135</span>);
+  canvas.setTextSize(<span class="kw">2</span>);
+}
+
+<span class="kw">void</span> loop() {
+  M5Cardputer.update();
+  <span class="kw">uint32_t</span> now = millis();
+  <span class="kw">if</span> (now - lastFrame &lt; <span class="kw">33</span>) <span class="kw">return</span>;   <span class="cm">// ~30fps</span>
+  lastFrame = now;
+
+  canvas.fillSprite(TFT_BLACK);
+  canvas.setTextColor(TFT_ORANGE);
+  canvas.drawString(<span class="st">"moving"</span>, x, <span class="kw">56</span>);
+  canvas.pushSprite(<span class="kw">0</span>, <span class="kw">0</span>);          <span class="cm">// 一次送出，不閃爍</span>
+
+  x = (x + <span class="kw">2</span>) % <span class="kw">240</span>;
+}</code></pre>
+  </figure>
+  <ul class="pts">
+    <li><b>中文顯示</b>：內建字型只有 ASCII。要顯示中文，用 M5GFX 的 <code class="inl">efont</code> 字型（<code class="inl">canvas.setFont(&amp;fonts::efontCN_16)</code>），或把需要的字做成點陣圖。全字庫很吃 flash，先想清楚要不要中文。</li>
+    <li><b>畫面很小</b>：240×135 大約只放得下 6 行 16px 文字。設計時就以「一次只顯示一件事」為前提。</li>
+    <li><b>背光</b>：<code class="inl">M5Cardputer.Display.setBrightness(0~255)</code>，做電子雞這種長時間開著的 app 要記得調暗省電。</li>
+  </ul>
+  <div class="goal"><b>產出</b><span>一個不閃爍、跑 30fps 的動畫畫面，以及一個你能重複使用的 render() 函式。</span></div>
+</section>
+
+<section class="lesson" id="l03">
+  <div class="lesson-head"><span class="num">03</span><h3>鍵盤：讀鍵、做一個輸入框</h3></div>
+  <p>
+    ADV 用的是 TCA8418 鍵盤控制器（走 I2C，有中斷腳），但 M5Cardputer 函式庫把它包成跟初代一樣的 API，
+    你不用管底層差異。核心只有三個呼叫。
+  </p>
+  <figure class="code">
+    <figcaption>文字輸入框</figcaption>
+<pre><code>String buffer = <span class="st">""</span>;
+
+<span class="kw">void</span> loop() {
+  M5Cardputer.update();
+
+  <span class="kw">if</span> (M5Cardputer.Keyboard.isChange() &amp;&amp; M5Cardputer.Keyboard.isPressed()) {
+    <span class="kw">auto</span> st = M5Cardputer.Keyboard.keysState();
+
+    <span class="kw">for</span> (<span class="kw">auto</span> c : st.word) buffer += c;      <span class="cm">// 一般字元</span>
+    <span class="kw">if</span> (st.del &amp;&amp; buffer.length()) buffer.remove(buffer.length() - <span class="kw">1</span>);
+    <span class="kw">if</span> (st.enter) { onSubmit(buffer); buffer = <span class="st">""</span>; }
+
+    render();                                    <span class="cm">// 只在有變化時重畫</span>
+  }
+}</code></pre>
+  </figure>
+  <ul class="pts">
+    <li><code class="inl">isChange()</code> 是「這一輪跟上一輪不同」——等同 <code class="inl">watch()</code>，用它來避免每圈都重畫。</li>
+    <li><code class="inl">keysState()</code> 回傳的結構裡有 <code class="inl">word</code>（字元陣列）、<code class="inl">enter</code>、<code class="inl">del</code>、<code class="inl">tab</code>、<code class="inl">fn</code>、<code class="inl">ctrl</code>、<code class="inl">shift</code>、<code class="inl">opt</code>、<code class="inl">alt</code>。</li>
+    <li>要做遊戲的話別用這個——用 <code class="inl">isKeyPressed('z')</code> 檢查「當下是否按住」，才有連續移動的手感。</li>
+  </ul>
+  <div class="goal"><b>產出</b><span>可以打字、退格、按 Enter 送出的輸入框。這會是第 06 課填 WiFi 密碼的元件。</span></div>
+</section>
+
+<section class="lesson" id="l04">
+  <div class="lesson-head"><span class="num">04</span><h3>主迴圈與狀態機：丟掉 delay()，搬到 PlatformIO</h3></div>
+  <p>
+    這一課沒有新硬體，但它決定你之後的程式好不好維護。<strong><code class="inl">delay()</code> 會凍結整台機器</strong>——
+    按鍵讀不到、WiFi 不回應、聲音會斷。它相當於在 Node 主執行緒裡跑 while 空轉。
+  </p>
+  <figure class="code">
+    <figcaption>非阻塞的多工節奏 · 概念等同多個 setInterval</figcaption>
+<pre><code><span class="kw">uint32_t</span> tRender = <span class="kw">0</span>, tPoll = <span class="kw">0</span>, tSave = <span class="kw">0</span>;
+
+<span class="kw">void</span> loop() {
+  M5Cardputer.update();
+  <span class="kw">uint32_t</span> now = millis();
+
+  <span class="kw">if</span> (now - tRender &gt;= <span class="kw">33</span>)     { tRender = now; render();     }  <span class="cm">// 30fps</span>
+  <span class="kw">if</span> (now - tPoll   &gt;= <span class="kw">60000</span>)  { tPoll   = now; fetchData();  }  <span class="cm">// 每分鐘</span>
+  <span class="kw">if</span> (now - tSave   &gt;= <span class="kw">300000</span>) { tSave   = now; saveState(); }  <span class="cm">// 每五分鐘</span>
+}</code></pre>
+  </figure>
+  <p>
+    再加上一個 <code class="inl">enum AppState { MENU, RUNNING, PAUSED }</code> 的狀態機，你的 app 骨架就完成了。
+    之後每個專案都是同一個骨架換內容。
+  </p>
+  <p><strong>接著搬到 PlatformIO。</strong>安裝 VS Code 的 PlatformIO IDE 擴充套件，新建專案後把設定檔寫成：</p>
+  <figure class="code">
+    <figcaption>platformio.ini</figcaption>
+<pre><code>[env:cardputer-adv]
+platform     = espressif32
+board        = m5stack-stamps3
+framework    = arduino
+monitor_speed = 115200
+monitor_filters = esp32_exception_decoder   <span class="cm">; 當機時把記憶體位址翻成行號，非常重要</span>
+
+build_flags =
+  -DARDUINO_USB_CDC_ON_BOOT=1
+
+lib_deps =
+  m5stack/M5Cardputer
+  bblanchon/ArduinoJson@^7.0.0</code></pre>
+  </figure>
+  <div class="note">
+    <b>指令對照</b>
+    <p><code class="inl">pio run</code> 編譯 · <code class="inl">pio run -t upload</code> 燒錄 · <code class="inl">pio device monitor</code> 看 log。
+    這三個指令就是你的 <code class="inl">npm run build / deploy / logs</code>，也是第 11 課讓 Claude Code 自己跑的入口。</p>
+  </div>
+  <div class="note warn">
+    <b>如果編譯失敗</b>
+    <p>PlatformIO 官方的 <code class="inl">espressif32</code> 平台版本比 M5 官方板管落後，有時對不上新版函式庫。遇到怪錯誤時，
+    把 <code class="inl">platform</code> 換成社群維護的 <b>pioarduino</b> 平台（提供較新的 ESP32 Arduino 核心），
+    或先退回 Arduino IDE 確認不是程式本身的問題。</p>
+  </div>
+  <div class="goal"><b>產出</b><span>一個 PlatformIO 專案骨架，含狀態機與非阻塞排程，可以複製去開每個新專案。</span></div>
+</section>
+
+<div class="stage">
+  <span class="tag">階段 2</span>
+  <h2>你的三個目標專案</h2>
+  <span class="est">每個約 1～2 個晚上</span>
+</div>
+
+<section class="lesson" id="l05">
+  <div class="lesson-head"><span class="num">05</span><h3>聲音 → 電子琴</h3></div>
+  <p>
+    ADV 的音訊路徑是 <strong>ES8311 編解碼器 + NS4150B 放大器 + 1W 喇叭</strong>，而且多了 3.5mm 耳機孔
+    （插入耳機時喇叭會自動靜音）。M5Unified 的 <code class="inl">Speaker</code> 已經把這條路徑包好，
+    最重要的是它支援 <strong>最多 8 個虛擬聲道</strong>——這就是你的複音。
+  </p>
+  <figure class="code">
+    <figcaption>keyboard-piano.ino · 一個八度</figcaption>
+<pre><code><span class="kw">#include</span> <span class="st">&lt;M5Cardputer.h&gt;</span>
+<span class="kw">#include</span> <span class="st">&lt;math.h&gt;</span>
+
+<span class="cm">// 下面兩排鍵 = 一個八度。z 是 C4，s 是 C#4，以此類推</span>
+<span class="kw">const</span> <span class="kw">char</span>* WHITE = <span class="st">"zxcvbnm"</span>;   <span class="kw">const</span> <span class="kw">int</span> WHITE_ST[] = {<span class="kw">0</span>,<span class="kw">2</span>,<span class="kw">4</span>,<span class="kw">5</span>,<span class="kw">7</span>,<span class="kw">9</span>,<span class="kw">11</span>};
+<span class="kw">const</span> <span class="kw">char</span>* BLACK = <span class="st">"sdghj"</span>;     <span class="kw">const</span> <span class="kw">int</span> BLACK_ST[] = {<span class="kw">1</span>,<span class="kw">3</span>,<span class="kw">6</span>,<span class="kw">8</span>,<span class="kw">10</span>};
+
+<span class="kw">int</span> octave = <span class="kw">4</span>;
+<span class="kw">int</span> nextCh = <span class="kw">0</span>;
+
+<span class="kw">float</span> freqOf(<span class="kw">int</span> semitone) {
+  <span class="cm">// A4 = 440Hz；C4 距離 A4 是 -9 個半音</span>
+  <span class="kw">return</span> <span class="kw">440.0f</span> * powf(<span class="kw">2.0f</span>, (semitone - <span class="kw">9</span> + (octave - <span class="kw">4</span>) * <span class="kw">12</span>) / <span class="kw">12.0f</span>);
+}
+
+<span class="kw">void</span> play(<span class="kw">int</span> semitone) {
+  M5Cardputer.Speaker.tone(freqOf(semitone), <span class="kw">220</span>, nextCh, <span class="kw">false</span>);
+  nextCh = (nextCh + <span class="kw">1</span>) % <span class="kw">8</span>;   <span class="cm">// 輪流用 8 個聲道 → 和弦不會互相打斷</span>
+}
+
+<span class="kw">void</span> setup() {
+  <span class="kw">auto</span> cfg = M5.config();
+  M5Cardputer.begin(cfg, <span class="kw">true</span>);
+  M5Cardputer.Speaker.begin();
+  M5Cardputer.Speaker.setVolume(<span class="kw">140</span>);
+}
+
+<span class="kw">void</span> loop() {
+  M5Cardputer.update();
+  <span class="kw">if</span> (!M5Cardputer.Keyboard.isChange() || !M5Cardputer.Keyboard.isPressed()) <span class="kw">return</span>;
+
+  <span class="kw">auto</span> st = M5Cardputer.Keyboard.keysState();
+  <span class="kw">for</span> (<span class="kw">auto</span> c : st.word) {
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="kw">0</span>; i &lt; <span class="kw">7</span>; i++) <span class="kw">if</span> (c == WHITE[i]) play(WHITE_ST[i]);
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="kw">0</span>; i &lt; <span class="kw">5</span>; i++) <span class="kw">if</span> (c == BLACK[i]) play(BLACK_ST[i]);
+    <span class="kw">if</span> (c == <span class="st">','</span> &amp;&amp; octave &gt; <span class="kw">1</span>) octave--;    <span class="cm">// 降八度</span>
+    <span class="kw">if</span> (c == <span class="st">'.'</span> &amp;&amp; octave &lt; <span class="kw">7</span>) octave++;    <span class="cm">// 升八度</span>
+  }
+}</code></pre>
+  </figure>
+  <ul class="pts">
+    <li><b>先做到會響，再做好聽。</b><code class="inl">tone()</code> 是方波，聽起來像紅白機。想要更像琴，下一步是用 <code class="inl">playRaw()</code> 餵自己算的波形陣列，加上 ADSR 包絡。</li>
+    <li><b>加畫面回饋。</b>把第 02 課的 Sprite 拿來畫琴鍵，按下去的鍵反白——這樣它才像一台樂器而不是一個實驗。</li>
+    <li><b>錄音也在這裡。</b>ADV 有 MEMS 麥克風（SNR 65dB），<code class="inl">M5Cardputer.Mic</code> 可以錄下來存到 SD 卡。取樣器是很自然的下一個版本。</li>
+  </ul>
+  <div class="goal"><b>產出</b><span>按鍵會發出正確音高、可以按和弦、能升降八度、螢幕上有琴鍵回饋的電子琴。</span></div>
+</section>
+
+<section class="lesson" id="l06">
+  <div class="lesson-head"><span class="num">06</span><h3>連網 → Claude 額度記錄器</h3></div>
+  <p>
+    這一課是你最有優勢的地方。<strong>架構上請不要讓 Cardputer 直接打 Anthropic 的 API</strong>，
+    原因很具體：ESP32 要跑 TLS + 憑證驗證、沒有 PSRAM、而且你不會想把金鑰燒進韌體裡。
+    正確的分工是——你的 Mac 上跑一個 Node 小服務，Cardputer 只在區網內抓一包乾淨的 JSON。
+  </p>
+  <div class="note warn">
+    <b>先確認你要記錄的是哪一種額度</b>
+    <p><b>Claude Code 訂閱制（Pro / Max）</b>：沒有公開的用量查詢 API。資料在你本機 <code class="inl">~/.claude/</code> 底下，
+    用 Node 讀出來就好——這反而比呼叫 API 更即時。</p>
+    <p><b>Console API key 計費</b>：有 Admin API 的用量與成本報表
+    （<code class="inl">GET /v1/organizations/usage_report/messages</code>、<code class="inl">/v1/organizations/cost_report</code>），
+    需要 Console 建立的 <b>Admin API key</b>（<code class="inl">sk-ant-admin…</code>），而且這兩個端點目前只能用原始 HTTP 呼叫、SDK 沒有包。</p>
+  </div>
+  <figure class="code">
+    <figcaption>usage-bridge.mjs · 跑在你的 Mac</figcaption>
+<pre><code><span class="kw">import</span> { createServer } <span class="kw">from</span> <span class="st">'node:http'</span>
+<span class="kw">import</span> { execFile } <span class="kw">from</span> <span class="st">'node:child_process'</span>
+<span class="kw">import</span> { promisify } <span class="kw">from</span> <span class="st">'node:util'</span>
+<span class="kw">const</span> run = promisify(execFile)
+
+<span class="kw">let</span> cache = { at: <span class="kw">0</span>, data: <span class="kw">null</span> }
+
+<span class="cm">// ccusage 會解析 ~/.claude 底下的本機用量紀錄</span>
+<span class="cm">// 先在終端機跑一次確認欄位：npx ccusage@latest daily --json | head -40</span>
+<span class="kw">async function</span> readUsage() {
+  <span class="kw">const</span> { stdout } = <span class="kw">await</span> run(<span class="st">'npx'</span>, [<span class="st">'-y'</span>, <span class="st">'ccusage@latest'</span>, <span class="st">'daily'</span>, <span class="st">'--json'</span>])
+  <span class="kw">const</span> today = JSON.parse(stdout).daily?.at(-<span class="kw">1</span>) ?? {}
+  <span class="kw">return</span> {
+    usd:    Number(today.totalCost   ?? <span class="kw">0</span>),
+    tokens: Number(today.totalTokens ?? <span class="kw">0</span>),
+    at:     <span class="kw">new</span> Date().toTimeString().slice(<span class="kw">0</span>, <span class="kw">5</span>),
+  }
+}
+
+createServer(<span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">if</span> (Date.now() - cache.at &gt; <span class="kw">60_000</span>) {
+    cache = { at: Date.now(), data: <span class="kw">await</span> readUsage().catch(() =&gt; cache.data) }
+  }
+  res.writeHead(<span class="kw">200</span>, { <span class="st">'content-type'</span>: <span class="st">'application/json'</span> })
+  res.end(JSON.stringify(cache.data ?? { usd: <span class="kw">0</span>, tokens: <span class="kw">0</span>, at: <span class="st">'--:--'</span> }))
+}).listen(<span class="kw">8787</span>, <span class="st">'0.0.0.0'</span>)
+
+console.log(<span class="st">'bridge on http://0.0.0.0:8787'</span>)</code></pre>
+  </figure>
+  <figure class="code">
+    <figcaption>Cardputer 端 · 每分鐘抓一次</figcaption>
+<pre><code><span class="kw">#include</span> <span class="st">&lt;M5Cardputer.h&gt;</span>
+<span class="kw">#include</span> <span class="st">&lt;WiFi.h&gt;</span>
+<span class="kw">#include</span> <span class="st">&lt;HTTPClient.h&gt;</span>
+<span class="kw">#include</span> <span class="st">&lt;ArduinoJson.h&gt;</span>
+<span class="kw">#include</span> <span class="st">"secrets.h"</span>   <span class="cm">// WIFI_SSID / WIFI_PASS / BRIDGE_URL，記得加進 .gitignore</span>
+
+<span class="kw">float</span> usd = <span class="kw">0</span>;  <span class="kw">long</span> tokens = <span class="kw">0</span>;  String stamp = <span class="st">"--:--"</span>;
+
+<span class="kw">void</span> fetchUsage() {
+  <span class="kw">if</span> (WiFi.status() != WL_CONNECTED) <span class="kw">return</span>;
+  WiFiClient client;  HTTPClient http;
+  http.begin(client, BRIDGE_URL);
+  <span class="kw">if</span> (http.GET() == <span class="kw">200</span>) {
+    JsonDocument doc;                       <span class="cm">// ArduinoJson v7，不用先算大小</span>
+    <span class="kw">if</span> (!deserializeJson(doc, http.getString())) {
+      usd    = doc[<span class="st">"usd"</span>]    | <span class="kw">0.0f</span>;
+      tokens = doc[<span class="st">"tokens"</span>] | <span class="kw">0L</span>;
+      stamp  = String((<span class="kw">const</span> <span class="kw">char</span>*)(doc[<span class="st">"at"</span>] | <span class="st">"--:--"</span>));
+    }
+  }
+  http.end();
+}
+
+<span class="kw">void</span> setup() {
+  <span class="kw">auto</span> cfg = M5.config();
+  M5Cardputer.begin(cfg, <span class="kw">true</span>);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+}
+
+<span class="kw">uint32_t</span> tPoll = <span class="kw">0</span>;
+<span class="kw">void</span> loop() {
+  M5Cardputer.update();
+  <span class="kw">if</span> (millis() - tPoll &gt;= <span class="kw">60000</span> || tPoll == <span class="kw">0</span>) { tPoll = millis(); fetchUsage(); render(); }
+}</code></pre>
+  </figure>
+  <ul class="pts">
+    <li><b>顯示要能一眼看懂。</b>240×135 放不下表格。建議：一個大數字（今日花費）+ 一條橫向長條（佔每日預算的比例）+ 右下角更新時間。</li>
+    <li><b>用顏色編碼狀態</b>，別只靠數字：綠 → 黃 → 橘，越接近你設的上限越紅。</li>
+    <li><b>下一步</b>：把 bridge 換成 SSE 或 WebSocket 推播、加上七天趨勢的小折線圖、快到上限時用喇叭嗶一聲。</li>
+  </ul>
+  <div class="goal"><b>產出</b><span>放在桌上的實體儀表板，隨時看得到今天燒了多少額度。</span></div>
+</section>
+
+<section class="lesson" id="l07">
+  <div class="lesson-head"><span class="num">07</span><h3>存檔與時間 → 電子雞</h3></div>
+  <p>
+    電子雞的技術核心其實只有一句話：<strong>關機期間也要繼續變老</strong>。
+    所以你需要「持久化的狀態」加上「可信的時間差」。
+  </p>
+  <ul class="pts">
+    <li><b>存檔用 NVS（Preferences）</b>，不要用 SD 卡。它寫在 flash 裡，斷電不掉，API 幾乎就是 localStorage。SD 卡留給圖片、音效、log。</li>
+    <li><b>時間要靠 NTP。</b>ADV 沒有獨立的 RTC 晶片，斷電後時間會歸零。做法是開機連上 WiFi 後對一次時，把 epoch 存進 NVS。</li>
+    <li><b>離線衰減</b>：開機時算 <code class="inl">now - lastSeen</code>，一次補完這段時間該掉的飢餓值與心情值。</li>
+  </ul>
+  <figure class="code">
+    <figcaption>存檔與離線補算</figcaption>
+<pre><code><span class="kw">#include</span> <span class="st">&lt;Preferences.h&gt;</span>
+<span class="kw">#include</span> <span class="st">&lt;time.h&gt;</span>
+
+Preferences prefs;
+<span class="kw">struct</span> Pet { <span class="kw">uint8_t</span> hunger, mood; <span class="kw">uint32_t</span> age; } pet;
+
+<span class="kw">void</span> load() {
+  prefs.begin(<span class="st">"tama"</span>, <span class="kw">false</span>);                    <span class="cm">// false = 可讀寫</span>
+  pet.hunger = prefs.getUChar(<span class="st">"hunger"</span>, <span class="kw">50</span>);
+  pet.mood   = prefs.getUChar(<span class="st">"mood"</span>,   <span class="kw">80</span>);
+  pet.age    = prefs.getULong(<span class="st">"age"</span>,    <span class="kw">0</span>);
+
+  <span class="kw">uint32_t</span> last = prefs.getULong(<span class="st">"seen"</span>, <span class="kw">0</span>);
+  <span class="kw">uint32_t</span> now  = time(<span class="kw">nullptr</span>);                  <span class="cm">// NTP 對時後才有效</span>
+  <span class="kw">if</span> (last &amp;&amp; now &gt; last) {
+    <span class="kw">uint32_t</span> mins = (now - last) / <span class="kw">60</span>;
+    pet.hunger = (pet.hunger &gt; mins / <span class="kw">10</span>) ? pet.hunger - mins / <span class="kw">10</span> : <span class="kw">0</span>;
+    pet.age   += mins;
+  }
+}
+
+<span class="kw">void</span> save() {
+  prefs.putUChar(<span class="st">"hunger"</span>, pet.hunger);
+  prefs.putUChar(<span class="st">"mood"</span>,   pet.mood);
+  prefs.putULong(<span class="st">"age"</span>,    pet.age);
+  prefs.putULong(<span class="st">"seen"</span>,   time(<span class="kw">nullptr</span>));
+}
+
+<span class="kw">void</span> syncTime() {
+  configTime(<span class="kw">8</span> * <span class="kw">3600</span>, <span class="kw">0</span>, <span class="st">"pool.ntp.org"</span>);        <span class="cm">// 台灣 UTC+8</span>
+}</code></pre>
+  </figure>
+  <div class="note">
+    <b>寫入次數要克制</b>
+    <p>Flash 有抹寫壽命。<b>不要每一圈都存檔</b>——每 5 分鐘、或狀態真的改變時再寫。這也是為什麼第 04 課的排程器要先做好。</p>
+  </div>
+  <p>
+    剩下的就全是設計了：像素角色動畫（把每一幀畫進 Sprite）、餵食／玩耍／清理三個動作綁按鍵、
+    肚子餓時用喇叭叫、搖晃機器（第 08 課的 IMU）逗牠玩。
+  </p>
+  <div class="goal"><b>產出</b><span>一隻關機隔天再開會餓的電子寵物。</span></div>
+</section>
+
+<section class="lesson" id="l08">
+  <div class="lesson-head"><span class="num">08</span><h3>雜項感測器：IMU、紅外線、電量</h3></div>
+  <p>這一課是「把剩下的硬體都認識一遍」，每一項都只有幾行，但會讓你的 app 立刻變有趣。</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>硬體</th><th>API</th><th>可以拿來做什麼</th></tr></thead>
+    <tbody>
+      <tr><td><b>BMI270 六軸</b><br><span class="mono" style="color:var(--ink-3)">ADV 限定，初代沒有</span></td><td class="mono">M5Cardputer.Imu<br>.getAccel(&amp;x,&amp;y,&amp;z)</td><td>搖一搖逗電子雞、翻轉切換頁面、計步、傾斜控制遊戲</td></tr>
+      <tr><td><b>紅外線發射</b><br><span class="mono" style="color:var(--ink-3)">GPIO 44</span></td><td class="mono">IRremote 函式庫<br>（M5Cardputer 已相依）</td><td>萬用遙控器：關掉會議室的冷氣與投影機</td></tr>
+      <tr><td><b>電池電量</b></td><td class="mono">M5Cardputer.Power<br>.getBatteryLevel()</td><td>狀態列顯示電量、低電量自動調暗背光</td></tr>
+      <tr><td><b>麥克風</b><br><span class="mono" style="color:var(--ink-3)">MEMS · SNR 65dB</span></td><td class="mono">M5Cardputer.Mic<br>.record(buf, len)</td><td>錄音存 SD、音量計、拍手觸發</td></tr>
+      <tr><td><b>Grove 埠</b><br><span class="mono" style="color:var(--ink-3)">G1 / G2 · 5V</span></td><td class="mono">Wire.begin(2, 1)</td><td>接 M5 的各種 Unit：溫濕度、光線、旋鈕、RFID</td></tr>
+      <tr><td><b>EXT 14 針</b></td><td class="mono">SPI / I2C / UART</td><td>接 SPI 螢幕、自製擴充板；SD 卡也走這組 SPI</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="goal"><b>產出</b><span>一個「硬體檢查」小工具：一頁顯示加速度、電量、麥克風音量，按鍵可發射紅外線。之後除錯很好用。</span></div>
+</section>
+
+<div class="stage">
+  <span class="tag">階段 3</span>
+  <h2>變成「你自己的機器」</h2>
+  <span class="est">持續進行</span>
+</div>
+
+<section class="lesson" id="l09">
+  <div class="lesson-head"><span class="num">09</span><h3>打包成 .bin，收進 Launcher</h3></div>
+  <p>
+    你已經裝了 Launcher，它的價值就是<strong>不用接電腦就能切換 app</strong>。
+    要讓你的作品進到清單裡，只需要把編譯出來的韌體檔放上 SD 卡。
+  </p>
+  <ul class="pts">
+    <li><b>Arduino IDE</b>：專案 → 匯出已編譯的二進位檔，檔案會出現在 sketch 資料夾的 <code class="inl">build/</code> 底下。</li>
+    <li><b>PlatformIO</b>：<code class="inl">pio run</code> 之後在 <code class="inl">.pio/build/cardputer-adv/firmware.bin</code>。</li>
+    <li>把 <code class="inl">.bin</code> 複製到 SD 卡上 Launcher 指定的資料夾（依你裝的 Launcher 版本而定，通常是根目錄或 <code class="inl">/bin</code>）。檔名就是選單上顯示的名字，取好一點。</li>
+  </ul>
+  <div class="note">
+    <b>不怕壞</b>
+    <p>不管載入什麼都可以用 M5Burner 燒回 Launcher。這是第 00 課買的保險，現在開始領。</p>
+  </div>
+  <p>
+    再進一階是 <b>OTA</b>：讓裝置從你的 Node 服務抓新韌體自己更新（<code class="inl">Update</code> 函式庫）。
+    對你來說這就是熟悉的部署流程——只是部署目標從 Vercel 變成口袋裡那台。
+  </p>
+  <div class="goal"><b>產出</b><span>電子琴、額度記錄器、電子雞三個 .bin 都躺在 SD 卡裡，隨開隨選。</span></div>
+</section>
+
+<section class="lesson" id="l10">
+  <div class="lesson-head"><span class="num">10</span><h3>外接相機：Unit CamS3</h3></div>
+  <div class="note warn">
+    <b>先修正一個常見誤解</b>
+    <p>Cardputer ADV <b>沒有辦法直接驅動裸相機模組</b>——Grove 埠只有兩根訊號線，而且機器沒有 PSRAM，
+    連一張 VGA 的影格都放不下。所以 M5 的相機配件（Unit CamS3 / CamS3-5MP）<b>本身就是一台完整的 ESP32-S3 電腦</b>，
+    帶 8MB PSRAM、16MB flash、自己的 microSD 和 WiFi。</p>
+  </div>
+  <p>
+    正確的心智模型是：<strong>相機是一台伺服器，Cardputer 是它的遙控器與觀景窗</strong>。
+    對你來說再熟悉不過——這就是前後端分離，只是後端變成一顆會拍照的東西。
+  </p>
+  <ul class="pts">
+    <li><b>CamS3 端</b>：可以用原廠韌體（拍照 + 上傳雲端），或自己燒一份簡單的 HTTP server，開出 <code class="inl">/capture</code>、<code class="inl">/stream</code>、<code class="inl">/thumb?w=240</code> 三個端點。</li>
+    <li><b>Cardputer 端</b>：抓 <code class="inl">/thumb</code> 回來的小張 JPEG，用 M5GFX 的 <code class="inl">drawJpg()</code> 直接畫上螢幕。<b>務必讓相機那端先縮圖</b>——不要把 2592×1944 的原圖丟給 Cardputer 解。</li>
+    <li><b>加值的地方在 Cardputer</b>：有鍵盤，所以可以現場替照片下標題、選拍攝參數、瀏覽 SD 卡裡的相簿。這是純相機做不到的。</li>
+  </ul>
+  <p>
+    這個專案值得晚一點做，但它會把前面全部串起來：WiFi（06）、JSON（06）、鍵盤（03）、Sprite（02）、SD 卡（07）。
+  </p>
+  <div class="goal"><b>產出</b><span>一台可以遙控快門、現場加標題、翻看縮圖的口袋相機組。</span></div>
+</section>
+
+<section class="lesson" id="l11">
+  <div class="lesson-head"><span class="num">11</span><h3>讓 Claude Code 幫你寫韌體</h3></div>
+  <p>
+    你已經在用 Claude Code。把韌體專案設定好之後，它可以自己編譯、自己燒錄、自己讀序列埠的錯誤訊息再修——
+    這對嵌入式開發特別有價值，因為「編譯 → 燒 → 看 log」這個迴圈很煩，但很機械。
+  </p>
+  <figure class="code">
+    <figcaption>CLAUDE.md · 放在專案根目錄</figcaption>
+<pre><code># Cardputer ADV 韌體專案
+
+## 硬體
+M5Stack Cardputer ADV：ESP32-S3FN8、8MB flash、512KB SRAM、**沒有 PSRAM**。
+螢幕 240x135 ST7789V2（setRotation(1)）。鍵盤 56 鍵走 TCA8418（I2C）。
+音訊 ES8311 codec。IMU 是 BMI270。
+
+## 指令
+- 編譯：`pio run`
+- 燒錄：`pio run -t upload`（若失敗，提醒我電源開關撥 OFF、按住 G0 再插 USB）
+- 看 log：`pio device monitor`
+
+## 規則
+- 一律用 M5Cardputer / M5Unified API，不要直接操作暫存器。
+- **禁止使用 delay()**，一律用 millis() 比較的非阻塞寫法。
+- 畫面一律先畫進 M5Canvas 再 pushSprite，不要直接畫 Display。
+- Sprite 預設 setColorDepth(8)；要用 16-bit 必須先說明記憶體預算。
+- 秘密資訊放 secrets.h，該檔已在 .gitignore。
+- 改完程式碼請跑 `pio run` 確認能編譯，不要只說「應該可以」。</code></pre>
+  </figure>
+  <ul class="pts">
+    <li><b>把硬體限制寫進 CLAUDE.md</b>，尤其「沒有 PSRAM」和「禁用 delay()」——這兩件事模型不知道就會寫出跑不動的程式。</li>
+    <li><b>讓它自己看 log。</b><code class="inl">esp32_exception_decoder</code> 開著的話，當機的 backtrace 會直接翻成檔名行號，Claude 讀得懂。</li>
+    <li><b>Node 那半邊更是它的主場</b>——bridge、OTA server、相機端的 API，直接交給它。</li>
+  </ul>
+  <div class="goal"><b>產出</b><span>一個你只要說「加一個電量顯示在右上角」就會自己編譯燒錄驗證的專案。</span></div>
+</section>
+
+
+<div class="stage">
+  <span class="tag">實作</span>
+  <h2>已完成的課 · 現場筆記</h2>
+  <span class="est">由各課 README.md 自動產生</span>
+</div>
+<section class="lesson" id="note-01">
+  <div class="lesson-head"><span class="num">01</span><h3>實作紀錄 · <code class="inl">HelloCardputer/</code></h3></div>
+  <p>第一支能燒進機器的程式。目標只有一個：確認環境與硬體都通了。</p>
+<h4>燒錄</h4>
+<figure class="code"><figcaption>bash</figcaption><pre><code>make flash SKETCH=HelloCardputer</code></pre></figure>
+<p>燒完把機身側邊電源開關撥到 <strong>ON</strong>，螢幕出現 <code class="inl">Hello, Cardputer</code>。</p>
+<h4>程式在做什麼</h4>
+<p>Arduino 沒有 <code class="inl">main()</code>，框架幫你寫好了，等同：</p>
+<figure class="code"><figcaption>js</figcaption><pre><code>setup()                    // 開機跑一次
+while (true) { loop() }    // 之後無限重複</code></pre></figure>
+<div class="tablewrap"><table><thead><tr><th>那一行</th><th>在做什麼</th></tr></thead><tbody><tr><td><code class="inl">#include &lt;M5Cardputer.h&gt;</code></td><td>等同 import，但是<strong>文字層級的複製貼上</strong>。這也是為什麼這支小程式編出來有 511KB —— 螢幕驅動、字型、WiFi 堆疊全被拉進來了</td></tr><tr><td><code class="inl">auto cfg = M5.config()</code></td><td><code class="inl">auto</code> = 型別推導（同 TS 的型別推斷）。回傳一包預設硬體設定，想改就在這行之後改 <code class="inl">cfg</code> 欄位</td></tr><tr><td><code class="inl">M5Cardputer.begin(cfg, true)</code></td><td>真正開機：螢幕、電源管理、喇叭。第二個參數 <code class="inl">true</code> = 順便啟用鍵盤，設 <code class="inl">false</code> 的話 <code class="inl">Keyboard</code> 讀不到東西</td></tr><tr><td><code class="inl">setRotation(1)</code></td><td><strong>不能省。</strong> 螢幕實體是直的（135×240），轉 1 才變成握著時看到的橫式 240×135</td></tr><tr><td><code class="inl">setTextSize(2)</code></td><td>字型<strong>倍率</strong>不是像素。基準 8px，所以 2 = 16px 高</td></tr><tr><td><code class="inl">drawString(s, 10, 56)</code></td><td><code class="inl">10, 56</code> 是<strong>左上角</strong>座標。垂直置中 ≈ (135 − 16) / 2</td></tr><tr><td><code class="inl">Serial.begin(115200)</code></td><td>傳輸速率，<strong>必須跟 <code class="inl">make monitor</code> 一致</strong>，不然是亂碼</td></tr><tr><td><code class="inl">M5Cardputer.update()</code></td><td>輪詢硬體狀態存進物件裡。<strong>沒有中斷、沒有事件監聽器</strong>，你要主動去問。漏掉這行鍵盤就是死的</td></tr></tbody></table></div>
+<h4>兩個觀念</h4>
+<p><strong>畫上去就留著。</strong> 螢幕自己有記憶，<code class="inl">setup()</code> 結束後字不會消失。跟瀏覽器每幀重繪的模型完全不同 —— 只在需要改變時才畫。</p>
+<p><strong><code class="inl">M5</code> 和 <code class="inl">M5Cardputer</code> 是兩個物件，不是筆誤。</strong> <code class="inl">M5</code> 來自底層 M5Unified，<code class="inl">M5Cardputer</code> 包在外面、多了鍵盤。</p>
+<h4>實測數字</h4>
+<figure class="code"><pre><code>Sketch uses 511155 bytes (38%) of program storage space.   上限 1.25MB
+Global variables use 25948 bytes (8%) of dynamic memory,
+  leaving 301732 bytes for local variables.                 上限 320KB</code></pre></figure>
+<p>每次編譯瞄一眼第二個數字，突然掉很多就是有東西吃記憶體。</p>
+<h4>踩過的坑</h4>
+<ul class="pts"><li><strong>序列埠看不到 <code class="inl">booted</code></strong> —— 它只在開機那一瞬間印一次。正確順序是<strong>先開監控、再讓機器重開</strong>：<code class="inl">make monitor</code> 開著，然後電源 OFF → ON。嵌入式沒有捲軸歷史，你不在場就是沒看到。</li><li><strong>不用手動進下載模式</strong> —— ESP32-S3 的原生 USB 可以自己重置。真的卡住時才需要：電源 OFF → 按住 G0 → 插 USB-C → 放開。</li></ul>
+</section>
+<section class="lesson" id="note-02">
+  <div class="lesson-head"><span class="num">02</span><h3>實作紀錄 · <code class="inl">SpriteDemo/</code></h3></div>
+  <p><strong>按任意鍵切換兩種畫法，親眼看差別。</strong></p>
+<h4>燒錄</h4>
+<figure class="code"><figcaption>bash</figcaption><pre><code>make flash SKETCH=SpriteDemo</code></pre></figure>
+<p>開機是紅字 <code class="inl">DIRECT</code>（故意的錯誤示範）—— 橘球會<strong>閃爍</strong>。 按任一鍵變綠字 <code class="inl">SPRITE</code> —— 同一顆球變滑順。</p>
+<h4>差別只在一件事</h4>
+<figure class="code"><figcaption>cpp</figcaption><pre><code>// ❌ DIRECT：兩次操作，使用者都看得到
+d.fillScreen(TFT_BLACK);           // 螢幕真的變黑了
+d.fillCircle(x, y, 10, ORANGE);    // 才畫上球
+                                   // ← 眼睛看得到中間那個全黑的瞬間
+
+// ✅ SPRITE：三次操作，前兩次在記憶體裡
+canvas.fillSprite(TFT_BLACK);      // 記憶體變黑，螢幕沒動
+canvas.fillCircle(x, y, 10, ...);  // 記憶體上有球了，螢幕還是沒動
+canvas.pushSprite(0, 0);           // ← 只有這行碰硬體，一次覆蓋整個螢幕</code></pre></figure>
+<p><code class="inl">M5Canvas</code> 就是一塊 240×135 的記憶體。所有繪圖在那裡完成，<code class="inl">pushSprite()</code> 才把成品整批送出。 概念同 virtual DOM：先在記憶體算出最終樣子，再一次性套用。</p>
+<h4>三個發現</h4>
+<p><strong>fps 兩種模式差不多。</strong> 瓶頸不在畫圖而在 SPI 傳輸 —— <strong>Sprite 解決的是視覺撕裂，不是速度。</strong></p>
+<p><strong>狀態與畫面要分離。</strong> <code class="inl">step()</code> 只更新資料、<code class="inl">drawXxx()</code> 只負責畫。 之後每個專案都用這個骨架。</p>
+<p><strong>記憶體代價比想像小。</strong> 全域只比第 01 課多 384 bytes（301732 → 301348）， 因為 Sprite 的 32KB 是在 <code class="inl">setup()</code> 裡動態配置的，不算全域。 開機時序列埠會印出真實剩餘量。</p>
+<h4>可以動手改</h4>
+<div class="tablewrap"><table><thead><tr><th>改哪裡</th><th>會發生什麼</th></tr></thead><tbody><tr><td><code class="inl">setColorDepth(8)</code> → <code class="inl">16</code></td><td>顏色變準，記憶體 32KB → 63KB</td></tr><tr><td><code class="inl">now - lastFrame &lt; 16</code> → <code class="inl">100</code></td><td>降到 10fps，DIRECT 的閃爍更明顯</td></tr><tr><td><code class="inl">fillCircle</code> → <code class="inl">fillRect(x, y, w, h, c)</code></td><td>球變方塊</td></tr></tbody></table></div>
+<h4>實測數字</h4>
+<figure class="code"><pre><code>Sketch uses 518123 bytes (39%)
+Global variables use 26332 bytes (8%), leaving 301348 bytes</code></pre></figure>
+</section>
+
+<section class="panel" id="map" style="margin-top:38px;">
+  <h3>附錄一 · Nuxt / Node ↔ Arduino 對照表</h3>
+  <p>大部分概念你都已經有了，只是換一組名字。真正需要重新學的只有最後三行。</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>你熟的</th><th>這裡的</th><th>備註</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">package.json</td><td class="mono">platformio.ini</td><td>相依、環境、編譯旗標都在一個檔</td></tr>
+      <tr><td class="mono">dependencies</td><td class="mono">lib_deps</td><td>寫上去就自動下載，語意化版號也支援</td></tr>
+      <tr><td class="mono">npm run build / deploy</td><td class="mono">pio run / pio run -t upload</td><td>燒錄約 15 秒</td></tr>
+      <tr><td class="mono">onMounted()</td><td class="mono">setup()</td><td>只跑一次</td></tr>
+      <tr><td class="mono">requestAnimationFrame</td><td class="mono">loop() + millis()</td><td>沒有排程器，節奏自己控</td></tr>
+      <tr><td class="mono">setInterval()</td><td class="mono">millis() 差值比較</td><td>見第 04 課</td></tr>
+      <tr><td class="mono">virtual DOM patch</td><td class="mono">M5Canvas → pushSprite</td><td>都是為了避免直接動畫面</td></tr>
+      <tr><td class="mono">localStorage</td><td class="mono">Preferences（NVS）</td><td>key-value，斷電不掉</td></tr>
+      <tr><td class="mono">fs / public/</td><td class="mono">microSD 卡</td><td>FAT32，走 SPI</td></tr>
+      <tr><td class="mono">process.env</td><td class="mono">secrets.h + .gitignore</td><td>沒有執行期環境變數這回事</td></tr>
+      <tr><td class="mono">console.log</td><td class="mono">Serial.printf</td><td>要開著序列埠監控才看得到</td></tr>
+      <tr><td class="mono" style="color:var(--accent)">HMR 熱更新</td><td class="mono" style="color:var(--accent)">沒有</td><td>每次改都要重新編譯燒錄</td></tr>
+      <tr><td class="mono" style="color:var(--accent)">try / catch</td><td class="mono" style="color:var(--accent)">沒有</td><td>記憶體不足直接重開機，看 backtrace</td></tr>
+      <tr><td class="mono" style="color:var(--accent)">垃圾回收</td><td class="mono" style="color:var(--accent)">沒有</td><td>String 用多了會記憶體碎片化，長時間執行要小心</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel" id="spec" style="margin-top:14px;">
+  <h3>附錄二 · Cardputer ADV 硬體速查</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>項目</th><th>規格</th><th>腳位</th></tr></thead>
+    <tbody>
+      <tr><td><b>主晶片</b></td><td>ESP32-S3FN8 · Xtensa LX7 雙核 240MHz · 8MB flash · 512KB SRAM（無 PSRAM）</td><td>模組 Stamp-S3A</td></tr>
+      <tr><td><b>螢幕</b></td><td>1.14" IPS · 240×135 · ST7789V2</td><td class="mono"><span class="pin">G38</span>BL <span class="pin">G33</span>RST <span class="pin">G34</span>RS <span class="pin">G35</span>DAT <span class="pin">G36</span>SCK <span class="pin">G37</span>CS</td></tr>
+      <tr><td><b>鍵盤</b></td><td>56 鍵 4×14 · TCA8418RTWR 控制器 · 160gf</td><td class="mono"><span class="pin">G8</span>SDA <span class="pin">G9</span>SCL <span class="pin">G11</span>INT</td></tr>
+      <tr><td><b>音訊</b></td><td>ES8311 codec + NS4150B 放大 + 8Ω 1W 喇叭 + 3.5mm 耳機孔（插入時喇叭靜音）</td><td class="mono"><span class="pin">G41</span>SCLK <span class="pin">G46</span>ASDOUT <span class="pin">G43</span>LRCK <span class="pin">G42</span>DSDIN</td></tr>
+      <tr><td><b>麥克風</b></td><td>MEMS · SNR 65dB</td><td class="mono">走 I2S</td></tr>
+      <tr><td><b>IMU</b></td><td>BMI270 六軸（ADV 限定）</td><td class="mono"><span class="pin">G8</span>/<span class="pin">G9</span> I2C</td></tr>
+      <tr><td><b>紅外線</b></td><td>發射器（無接收）</td><td class="mono"><span class="pin">G44</span>TX</td></tr>
+      <tr><td><b>microSD</b></td><td>SPI</td><td class="mono"><span class="pin">G12</span>CS <span class="pin">G14</span>MOSI <span class="pin">G40</span>CLK <span class="pin">G39</span>MISO</td></tr>
+      <tr><td><b>Grove</b></td><td>HY2.0-4P · 5V</td><td class="mono"><span class="pin">G2</span>黃 <span class="pin">G1</span>白</td></tr>
+      <tr><td><b>EXT 匯流排</b></td><td>2.54mm 14 針 · SPI + I2C + UART + 5V I/O</td><td class="mono"><span class="pin">G13</span>TX <span class="pin">G15</span>RX <span class="pin">G5</span>CS <span class="pin">G3</span>RST <span class="pin">G4</span>INT</td></tr>
+      <tr><td><b>電池</b></td><td>1750mAh 鋰電池 · USB-C 充電（充電時電源開關要 ON）</td><td class="mono"><span class="pin">G10</span>ADC</td></tr>
+      <tr><td><b>其他</b></td><td>RGB LED（用前要先把 GPIO38 拉高）· 磁吸背面 · 樂高孔</td><td class="mono">84 × 54 × 20mm · 81g</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note">
+    <b>相依版本下限</b>
+    <p>M5Stack 板管 ≥ 3.2.2 · M5Cardputer ≥ 1.1.0 · M5Unified ≥ 0.2.8 · M5GFX ≥ 0.2.10。低於這幾版 ADV 的硬體不會正常運作。</p>
+  </div>
+</section>
+
+<section class="panel" id="ram" style="margin-top:14px;">
+  <h3>附錄三 · 記憶體預算（這台機器最重要的一張表）</h3>
+  <p>
+    512KB SRAM、<strong>沒有 PSRAM</strong>，是 Cardputer ADV 所有設計限制的來源。
+    先把這幾個數字記起來，可以省下大量「為什麼一連 WiFi 就重開機」的除錯時間。
+  </p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>用途</th><th>大約佔用</th><th>說明</th></tr></thead>
+    <tbody>
+      <tr><td>可用 heap（開機後）</td><td class="mono">~320 KB</td><td>系統與 Arduino 核心先吃掉一部分</td></tr>
+      <tr><td>WiFi 協定堆疊</td><td class="mono">~50 KB</td><td><code class="inl">WiFi.begin()</code> 之後才配置</td></tr>
+      <tr><td>TLS 連線（HTTPS）</td><td class="mono">~40 KB / 條</td><td>這是不建議裝置直連 API 的主因</td></tr>
+      <tr><td>Sprite 240×135 @ 16-bit</td><td class="mono">63 KB</td><td>全彩全螢幕畫布</td></tr>
+      <tr><td>Sprite 240×135 @ 8-bit</td><td class="mono">32 KB</td><td>256 色，多數 app 夠用，建議預設</td></tr>
+      <tr><td>JPEG 解碼緩衝</td><td class="mono">依尺寸而定</td><td>相機專案務必讓對方先縮圖</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note warn">
+    <b>診斷用一行</b>
+    <p><code class="inl">Serial.printf("heap %u\n", ESP.getFreeHeap());</code> —— 放進 loop 的排程裡定期印出來。
+    數字持續下降就是記憶體洩漏，通常兇手是 <code class="inl">String</code> 的反覆串接。</p>
+  </div>
+</section>
+
+<section class="panel" id="links" style="margin-top:14px;">
+  <h3>附錄四 · 資源</h3>
+  <ul class="pts">
+    <li><a href="https://docs.m5stack.com/en/core/Cardputer-Adv">Cardputer-Adv 官方文件</a>　完整規格、腳位圖、原理圖</li>
+    <li><a href="https://docs.m5stack.com/en/arduino/m5cardputer/program">Arduino 編譯與燒錄教學</a>　含下載模式步驟</li>
+    <li><a href="https://github.com/m5stack/M5Cardputer">M5Cardputer 函式庫原始碼</a>　<b>examples/ 資料夾是最好的教材</b>，每個週邊都有可直接燒的範例</li>
+    <li><a href="https://github.com/m5stack/M5Unified">M5Unified</a>　Display / Speaker / Mic / Imu / Power 的實作都在這</li>
+    <li><a href="https://docs.m5stack.com/en/guide/wifi_camera/m5unitcams3/m5unitcams3">Unit CamS3 入門指南</a>　第 10 課的相機配件</li>
+    <li><a href="https://registry.platformio.org/libraries/m5stack/M5Cardputer">PlatformIO 上的 M5Cardputer</a>　確認最新版號</li>
+  </ul>
+  <p style="margin-bottom:0">
+    最實用的一招：<code class="inl">git clone</code> M5Cardputer 原始碼放在手邊，
+    需要查某個 API 怎麼用的時候，直接讓 Claude Code 讀 <code class="inl">examples/</code> 比查文件快。
+  </p>
+</section>
+
+</main>
+</div>
+</div>
+
+<footer>
+  <div class="wrap">
+    建議節奏：階段 0 今晚就做完，階段 1 用一個週末，之後每個晚上推進一課。
+    先做電子琴（最快看到成果），再做額度記錄器（發揮你的 Node 專長），電子雞留到最後（設計的部分最花時間）。
+  </div>
+</footer>
+
+</body>
+</html>
