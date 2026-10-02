@@ -10,6 +10,7 @@ secrets.h
 build/
 **/build/
 *.bin
+dist/
 *.elf
 *.map
 *.hex

@@ -27,9 +27,34 @@ make build   SKETCH=SpriteDemo    # 只編譯
 make flash   SKETCH=SpriteDemo    # 編譯並燒錄
 make monitor                      # 序列埠監控（Ctrl-C 離開）
 make ports                        # 列出接上的裝置
+
+make bin     SKETCH=SpriteDemo    # 產生 dist/SpriteDemo.bin
+make bin-all                      # 每一課都產一份到 dist/
 ```
 
-`SKETCH` 省略時預設 `HelloCardputer`。
+`SKETCH` 省略時預設 `TextInput`。
+
+## 收進 M5Launcher
+
+`make bin-all` 產出的 `dist/*.bin` 是純 app 映像（不含 bootloader），
+可直接複製到 microSD 根目錄，再用 [M5Launcher](https://bmorcelli.github.io/Launcher/)
+的 **SD** 選單安裝（或用 WUI 網頁介面的 OTA 直接上傳），之後就能在選單裡切換想跑哪一課。
+
+**怎麼切回 Launcher**：按左上角 **reset**，接著按 **上/下（`;` / `.`）**。
+不按的話會直接跑上次選的那支 —— 我們自己的 sketch 裡沒有回 Launcher 的程式碼，
+所以進去之後只剩這條路。實機分割表：
+
+```
+app0     app  test    0x010000  1344K   ← Launcher 本體
+helloc   app  ota_0   0x170000   512K   ← 各課裝在 OTA slot
+sprite   app  ota_1   0x1f0000   512K
+```
+
+Launcher 放在 `test` 分割區，bootloader 只有在開機瞬間偵測到按鍵才會去開它，
+otadata 平常指向 OTA slot。這就是為什麼「開機後才按」沒用，一定要按著開機。
+
+同資料夾的 `*.ino.merged.bin`（4 MB）是含 bootloader 的完整映像，
+給 esptool 從 offset 0 燒的。Launcher 兩種都吃，但沒必要為了 500K 的程式搬 4 MB。
 
 ## 換一台電腦
 

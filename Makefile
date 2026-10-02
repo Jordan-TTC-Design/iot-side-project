@@ -4,9 +4,13 @@ CFG    := $(HOME)/.arduinoIDE/arduino-cli.yaml
 FQBN   := m5stack:esp32:m5stack_cardputer
 PORT   ?= /dev/cu.usbmodem101
 SKETCH ?= TextInput
+BUILD  ?= build
+DIST   ?= dist
+# 所有課程資料夾（有同名 .ino 的就算一課）
+SKETCHES := $(sort $(patsubst %/,%,$(dir $(wildcard */*.ino))))
 ROADMAP ?= /private/tmp/claude-501/-Users-jordan-code-iot/51873ada-11de-47ac-8d31-60277002428e/scratchpad/cardputer-roadmap.html
 
-.PHONY: build flash monitor ports setup docs
+.PHONY: build flash monitor ports setup docs bin bin-all
 
 build:      ## 只編譯，不燒錄
 	"$(CLI)" --config-file "$(CFG)" compile --fqbn $(FQBN) $(SKETCH)
@@ -25,3 +29,15 @@ setup:      ## 在新電腦上重建開發環境
 
 docs:       ## 重新產生 docs/（會併入各課 README.md）
 	node scripts/build-docs.mjs "$(ROADMAP)"
+
+bin:        ## 產生 M5Launcher 用的 dist/$(SKETCH).bin
+	"$(CLI)" --config-file "$(CFG)" compile --fqbn $(FQBN) --output-dir "$(BUILD)/$(SKETCH)" $(SKETCH)
+	@mkdir -p "$(DIST)"
+	@cp "$(BUILD)/$(SKETCH)/$(SKETCH).ino.bin" "$(DIST)/$(SKETCH).bin"
+	@echo "→ $(DIST)/$(SKETCH).bin  ($$(du -h "$(DIST)/$(SKETCH).bin" | cut -f1))"
+
+bin-all:    ## 把每一課都產生一份 .bin 到 dist/
+	@for s in $(SKETCHES); do $(MAKE) --no-print-directory bin SKETCH=$$s || exit 1; done
+	@echo
+	@echo "複製到 SD 卡根目錄，再用 Launcher 的 SD 選單安裝："
+	@ls -1 "$(DIST)"
