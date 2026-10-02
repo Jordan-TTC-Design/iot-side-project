@@ -8,9 +8,12 @@ GET /usage.txt  → 每行一個帳號，Tab 分隔，給機器好解析：
                   A    <名稱>  <5h %>  <5h 重置 epoch>  <週 %>  <週重置 epoch>  <最後更新 epoch>
 GET /news.tsv   → 今日新聞包（超過 6 小時就在背景重新產生）
 GET /tts?t=文字&r=語速 → 念出來的聲音：8-bit 無號、11025Hz、單聲道的原始 PCM（Mac 的 say 產生）
+GET /np.txt     → Spotify 正在播放：state  歌名  歌手  專輯  位置秒  長度秒  音量  封面id（Mac 上的 Spotify App，AppleScript）
+GET /np/art     → 目前專輯封面，32×32 RGB565（高位元組在前），縮成 16 色像素風
+GET /np/cmd?c=play|next|prev|volup|voldown
 GET /           → 給人看的簡單狀態
 """
-import glob, json, os, subprocess, sys, tempfile, threading, time
+import glob, json, os, subprocess, sys, tempfile, threading, time, zlib
 from urllib.parse import parse_qs, urlparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -36,6 +39,55 @@ def tts(text, rate_wpm=165):
 
 
 news_lock = threading.Lock()
+
+# ─── Spotify（Mac 上的 App，用 AppleScript，不需要 API 金鑰） ───
+NP_SCRIPT = '''
+if application "Spotify" is not running then return "stopped"
+tell application "Spotify"
+  if player state is stopped then return "stopped"
+  set t to current track
+  set AppleScript's text item delimiters to tab
+  return {player state as string, name of t, artist of t, album of t, (player position as integer) as string, ((duration of t) div 1000) as string, sound volume as string, artwork url of t} as string
+end tell
+'''
+NP_CMDS = {
+    'play': 'tell application "Spotify" to playpause',
+    'next': 'tell application "Spotify" to next track',
+    'prev': 'tell application "Spotify" to previous track',
+    'volup': 'tell application "Spotify" to set sound volume to (sound volume + 10)',
+    'voldown': 'tell application "Spotify" to set sound volume to (sound volume - 10)',
+}
+art_cache = {'url': None, 'raw': b''}
+
+
+def osa(script):
+    r = subprocess.run(['osascript', '-e', script], capture_output=True, text=True, timeout=5)
+    return r.stdout.strip()
+
+
+def now_playing():
+    out = osa(NP_SCRIPT)
+    f = out.split('\t')
+    if len(f) < 8: return 'stopped\n', None
+    url = f[7]
+    f[7] = str(zlib.crc32(url.encode()))               # 封面 id：換歌才重抓
+    return '\t'.join(x.replace('\n', ' ') for x in f) + '\n', url
+
+
+def album_art(url):
+    """下載封面，縮成 32×32、16 色，回傳 RGB565（高位元組在前）"""
+    if art_cache['url'] == url: return art_cache['raw']
+    from PIL import Image
+    import io
+    jpg = subprocess.run(['curl', '-fsSL', '-m', '10', url], capture_output=True).stdout
+    im = Image.open(io.BytesIO(jpg)).convert('RGB').resize((32, 32), Image.BOX)
+    im = im.quantize(16, method=Image.Quantize.MEDIANCUT).convert('RGB')
+    raw = bytearray()
+    for r, g, b in im.getdata():
+        v = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
+        raw += v.to_bytes(2, 'big')
+    art_cache.update(url=url, raw=bytes(raw))
+    return art_cache['raw']
 
 
 def usage_lines():
@@ -87,6 +139,16 @@ class Handler(BaseHTTPRequestHandler):
             if not text: return self.send_error(400)
             wpm = int(q.get('r', ['165'])[0])   # 單字念慢一點
             self.send(tts(text, max(90, min(wpm, 250))), 'application/octet-stream')
+        elif self.path == '/np.txt':
+            self.send(now_playing()[0])
+        elif self.path == '/np/art':
+            _, url = now_playing()
+            self.send(album_art(url) if url else b'', 'application/octet-stream')
+        elif self.path.startswith('/np/cmd'):
+            c = parse_qs(urlparse(self.path).query).get('c', [''])[0]
+            if c not in NP_CMDS: return self.send_error(400)
+            osa(NP_CMDS[c])
+            self.send(now_playing()[0])
         elif self.path == '/':
             age = int((time.time() - os.path.getmtime(NEWS)) / 60) if os.path.exists(NEWS) else None
             self.send(f'哥布林營地橋接程式\n\n{usage_lines()}\n新聞包：{"沒有" if age is None else f"{age} 分鐘前"}\n')

@@ -5,7 +5,7 @@ struct MenuItem { const char* label; const char* const* icon; uint16_t color; Ap
 const MenuItem MENU[] = {
     {"英語單字", IC_BOOK, P::green, A_VOCAB},   {"今日新聞", IC_NEWS, P::blue, A_NEWS},
     {"守城打字", IC_SWORD, P::red, A_DEFENSE},  {"Claude 額度", IC_SPARK, P::claude, A_CLAUDE},
-    {"遙控器", IC_REMOTE, P::pink, A_REMOTE},    {"營火時鐘", IC_FIRE, P::amber, A_CLOCK},
+    {"正在播放", IC_NOTE, P::green, A_MUSIC},     {"遙控器", IC_REMOTE, P::pink, A_REMOTE},    {"營火時鐘", IC_FIRE, P::amber, A_CLOCK},
     {"設定", IC_GEAR, P::dim, A_SETTINGS},
 };
 constexpr int MENU_N = sizeof(MENU) / sizeof(MENU[0]);

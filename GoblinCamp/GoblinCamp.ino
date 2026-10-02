@@ -22,6 +22,7 @@
 #include "app_remote.h"
 #include "app_claude.h"
 #include "app_news.h"
+#include "app_music.h"
 #include "serial_sd.h"
 
 void blip(int freq, int ms) {
@@ -55,7 +56,7 @@ void setup() {
   wifiConnect();
 
   apps[A_HOME] = &homeApp;     apps[A_VOCAB] = &vocabApp;   apps[A_NEWS] = &newsApp;
-  apps[A_DEFENSE] = &defenseApp; apps[A_CLAUDE] = &claudeApp; apps[A_REMOTE] = &remoteApp;
+  apps[A_DEFENSE] = &defenseApp; apps[A_CLAUDE] = &claudeApp; apps[A_MUSIC] = &musicApp; apps[A_REMOTE] = &remoteApp;
   apps[A_CLOCK] = &clockApp;   apps[A_SETTINGS] = &settingsApp; apps[A_WIFI] = &wifiApp;
   go(A_HOME);
   lastInput = millis();

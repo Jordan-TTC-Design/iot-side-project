@@ -9,7 +9,7 @@ struct App {
   virtual bool textMode() { return false; }
 };
 
-enum AppId : uint8_t { A_HOME, A_VOCAB, A_NEWS, A_DEFENSE, A_CLAUDE, A_REMOTE, A_CLOCK, A_SETTINGS, A_WIFI, A_COUNT };
+enum AppId : uint8_t { A_HOME, A_VOCAB, A_NEWS, A_DEFENSE, A_CLAUDE, A_MUSIC, A_REMOTE, A_CLOCK, A_SETTINGS, A_WIFI, A_COUNT };
 App* apps[A_COUNT];
 App* cur = nullptr;
 AppId curId = A_HOME;

@@ -57,6 +57,9 @@ Cardputer ADV 的主介面：開機看到哥布林營地，左邊營地、右邊
   - 抽樣 30 字，大約 85～90% 跟一般字典一樣；不一樣的大多是 CMU 收的發音版本不同（例如 restaurant）
   - 待做：-ble／-tle 改成 `bl̩` 這類 KK 慣用寫法；跟 Wiktionary 交叉比對
   - 待做：緊接在主重音前的次重音要拿掉（imply 轉成 `ˏɪmˋplaɪ`，KK 寫 `ɪmˋplaɪ`）
+- **正在播放（Spotify）**：橋接程式用 AppleScript 讀寫 Mac 上的 Spotify App（不用 API 金鑰、不用 Premium）。`/np.txt` 歌名歌手進度、`/np/art` 封面縮成 32×32、16 色；機器上像素唱片機，封面當唱片標籤，‹ › 上下首、Enter 暫停、; . 音量。只抓得到這台 Mac 上播的
+- **橋接程式常駐**：`./tools/install_bridge.sh`（launchd `cc.goblin.bridge`，log 在 `~/Library/Logs/goblin-bridge.log`）；改了 bridge.py 再跑一次就會重新載入
+- **Claude 額度已接上**：2026-10-02 改了 `~/.claude/settings.json` 的 statusLine（前面加 goblin_statusline.py，ccstatusline 照舊）。另一個帳號如果有自己的 `CLAUDE_CONFIG_DIR`，那邊的 settings.json 也要改同一行
 - **發音**：Mac 上用 `say -v Samantha` 預錄單字和例句，放在 SD 卡
 - **複習**：Leitner 卡片盒間隔複習，進度存在 SD 卡
 - **跳級測驗**：每一級抽題測驗，通過才解鎖下一級
@@ -116,7 +119,6 @@ Cardputer ADV 的主介面：開機看到哥布林營地，左邊營地、右邊
 ---
 
 ## 之後可以考慮
-- **Spotify 正在播放**（2026-10-02 提出）：橋接程式用 AppleScript 控制 Mac 上的 Spotify App（不用 API 金鑰、不用 Premium），提供歌名、歌手、進度、專輯封面（縮成 32×32 像素風）；Cardputer 上做唱片機動畫，‹ › 上一首／下一首、Enter 暫停
 - 對講機模式問 Claude：麥克風錄音 → Mac 用 Whisper 轉文字 → Claude → 答案顯示在螢幕上
 - 發音練習：念一個單字，用 Whisper 辨識，判斷念得對不對
 - Claude Code 的允許／拒絕按鈕：接哥布林營地 server 的 `/claude/asks`、`/answer`
@@ -154,3 +156,4 @@ python3 tools/sd_put.py sd/goblin/vocab.tsv   # 透過 USB 寫進 SD 卡，不�
 - **2026-10-02（下午）**：韌體 v0.1 編譯通過；備份整份 flash；SD 傳檔工具
 - **2026-10-02（晚上）**：遙控器、營火時鐘常亮、守城字牌分軌、Mac 橋接、Claude 額度、新聞 app（編譯通過，等實機測試）
 - **2026-10-02（晚上）**：實機驗證遙控器版面、新聞、Claude 額度（mDNS 找到橋接程式）、發音（下載、存 SD、串流播放）
+- **2026-10-02（晚上）**：Spotify 正在播放、橋接程式 launchd 常駐、Claude 額度接上真的資料
