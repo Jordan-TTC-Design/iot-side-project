@@ -1,7 +1,7 @@
 // 真實天氣：Open-Meteo（免費、不用金鑰），Cardputer 直接用 Wi-Fi 抓，每 15 分鐘一次
+// 用一般 HTTP：HTTPS 一次要約 40KB 記憶體，開機一陣子後湊不出來就會失敗；天氣也不是機密
 // 營火場景依天氣變化：白天／晚上、雲、雨、雪、霧、打雷；冷了哥布林發抖、熱了冒汗
 #pragma once
-#include <WiFiClientSecure.h>
 
 struct City { const char* name; float lat, lon; };
 const City CITIES[] = {{"台北", 25.04f, 121.56f}, {"新北", 25.01f, 121.47f}, {"桃園", 24.99f, 121.30f},
@@ -68,24 +68,26 @@ struct Weather {
     lastTry = millis();
     if (WiFi.status() != WL_CONNECTED) return;
     const City& c = CITIES[cfg.city % CITY_N];
-    WiFiClientSecure tls;
-    tls.setInsecure();   // 只是天氣，不驗證憑證；省下放根憑證的麻煩
     HTTPClient http;
     http.setTimeout(6000);
-    String url = String("https://api.open-meteo.com/v1/forecast?latitude=") + String(c.lat, 2) + "&longitude=" + String(c.lon, 2) +
+    String url = String("http://api.open-meteo.com/v1/forecast?latitude=") + String(c.lat, 2) + "&longitude=" + String(c.lon, 2) +
                  "&current=temperature_2m,weather_code,is_day&daily=sunrise,sunset&timeformat=unixtime&timezone=Asia%2FTaipei&forecast_days=1";
-    if (!http.begin(tls, url)) return;
-    if (http.GET() == 200) {
+    if (!http.begin(url)) { Serial.println("天氣：連線失敗"); return; }
+    int code = http.GET();
+    if (code != 200) Serial.printf("天氣：HTTP %d %s\n", code, http.errorToString(code).c_str());
+    if (code == 200) {
       String js = http.getString();
       int cur = js.indexOf("\"current\"");
       float t = num(js, "\"temperature_2m\"", cur), wc = num(js, "\"weather_code\"", cur), d = num(js, "\"is_day\"", cur);
       int daily = js.indexOf("\"daily\"");
       int sr = js.indexOf("\"sunrise\"", daily), ss = js.indexOf("\"sunset\"", daily);
       if (!isnan(t) && !isnan(wc)) {
-        temp = t; code = (int)wc; isDay = d > 0.5f; ok = true;
+        temp = t; this->code = (int)wc; isDay = d > 0.5f; ok = true;
         if (sr > 0) sunrise = js.substring(js.indexOf('[', sr) + 1).toInt();
         if (ss > 0) sunset = js.substring(js.indexOf('[', ss) + 1).toInt();
-        Serial.printf("天氣：%s %.1f°C code %d\n", c.name, temp, code);
+        Serial.printf("天氣：%s %.1f°C code %d\n", c.name, temp, this->code);
+      } else {
+        Serial.printf("天氣：看不懂回應 %s\n", js.substring(0, 120).c_str());
       }
     }
     http.end();

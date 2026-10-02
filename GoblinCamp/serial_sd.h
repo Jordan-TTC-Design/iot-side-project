@@ -69,7 +69,7 @@ void serialTick() {
       if (id >= 0 && id < A_COUNT) { lastInput = millis(); go((AppId)id); }
       Serial.println("OK");
     } else if (line.startsWith("WX")) {   // WX <天氣代碼> <溫度> <白天 0/1>；WX off 恢復真實天氣
-      if (line == "WX off") { weather.forced = false; weather.lastTry = 0; }
+      if (line == "WX off") { weather.forced = false; weather.ok = false; weather.lastTry = 0; }   // 清掉假資料，重抓
       else {
         int a = line.indexOf(' ', 3), b = line.indexOf(' ', a + 1);
         weather.code = line.substring(3, a).toInt(); weather.temp = line.substring(a + 1, b).toFloat();

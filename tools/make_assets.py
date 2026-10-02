@@ -76,6 +76,9 @@ def main():
              sprite('SCOUT', C('goblin/scout.png')),
              sprite('SAGE', C('goblin/sage.png')),
              sprite('QUEEN', C('goblin/queen.png'), (0, 0, 64, 16)),          # 只要第一排（正面）
+             sprite('BRUTE', C('goblin/brute.png')),                            # 合唱團的其他成員
+             sprite('GOLDEN', C('goblin/golden.png')),
+             sprite('HALF', C('goblin/half_gob.png')),
              sprite('ZOMBIE', C('undead/worker.png')),                          # 守城遊戲的敵人
              sprite('OGRE', C('undead/brute.png')),
              sprite('TENT', os.path.join(GAME, 'Camps/tent/stage2.png'), (0, 0, 32, 24)),  # 營火＋主帳篷

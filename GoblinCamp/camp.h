@@ -79,6 +79,13 @@ void drawCamp(int x0, int y0, int w, int h, float t, float dt, CampOpt o = CampO
     drawClouds(x0, y0, w, t, sky == SKY_CLOUDY ? 3 : 5, cc, sh);
   }
 
+  // 霧：一層一層飄在天空，畫在角色後面，不遮到人
+  if (sky == SKY_FOG) {
+    uint16_t fc = mix(rgb(0x6a6e80), rgb(0xd6dde4), day);
+    for (int y = y0 + 14; y < gy - 34; y += 2)
+      for (int x = x0 + ((y / 2 + (int)(t * 4)) % 3); x < x0 + w; x += 3) cv.drawPixel(x, y, fc);
+  }
+
   int tx = x0 + o.tentX, ty = gy - 44, fx = tx + 10, fy = gy - 6;
   uint16_t skyAtFire = mix(P::sky1, rgb(0xa9d6f2), day), groundC = mix(P::ground, rgb(0x4f7d3a), day);
   // 營火的光暈：晚上明顯、白天幾乎看不到
@@ -166,10 +173,6 @@ void drawCamp(int x0, int y0, int w, int h, float t, float dt, CampOpt o = CampO
       int y = y0 + (int)fmodf(i * 31 + t * sp, h);
       R(x, y, (i % 3) ? 1 : 2, (i % 3) ? 1 : 2, rgb(0xf4f8ff));
     }
-  } else if (sky == SKY_FOG) {
-    uint16_t fc = mix(rgb(0x6a6e80), rgb(0xd6dde4), day);
-    for (int y = gy - 40; y < gy + 8; y += 2)   // 霧貼著地面，稀疏一點，不要蓋住字
-      for (int x = x0 + ((y / 2 + (int)(t * 4)) % 3); x < x0 + w; x += 3) cv.drawPixel(x, y, fc);
   }
   cv.clearClipRect();
 }

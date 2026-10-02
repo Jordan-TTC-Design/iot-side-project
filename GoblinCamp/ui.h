@@ -145,7 +145,8 @@ struct Sheet { const uint16_t* px; int w, h; };
 const Sheet S_WORKER{SPR_WORKER, SPR_WORKER_W, SPR_WORKER_H}, S_SCOUT{SPR_SCOUT, SPR_SCOUT_W, SPR_SCOUT_H},
     S_SAGE{SPR_SAGE, SPR_SAGE_W, SPR_SAGE_H}, S_QUEEN{SPR_QUEEN, SPR_QUEEN_W, SPR_QUEEN_H},
     S_TENT{SPR_TENT, SPR_TENT_W, SPR_TENT_H}, S_ZOMBIE{SPR_ZOMBIE, SPR_ZOMBIE_W, SPR_ZOMBIE_H},
-    S_OGRE{SPR_OGRE, SPR_OGRE_W, SPR_OGRE_H};
+    S_OGRE{SPR_OGRE, SPR_OGRE_W, SPR_OGRE_H}, S_BRUTE{SPR_BRUTE, SPR_BRUTE_W, SPR_BRUTE_H},
+    S_GOLDEN{SPR_GOLDEN, SPR_GOLDEN_W, SPR_GOLDEN_H}, S_HALF{SPR_HALF, SPR_HALF_W, SPR_HALF_H};
 enum Rot : uint8_t { R0, FLIP, LYING };  // LYING：往左躺下（睡覺用）
 void sprite(const Sheet& s, int frame, int x, int y, int sc = 2, Rot r = R0) {
   int cols = s.w / 16, sx = (frame % cols) * 16, sy = (frame / cols) * 16;
