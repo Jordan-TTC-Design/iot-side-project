@@ -46,8 +46,17 @@ if application "Spotify" is not running then return "stopped"
 tell application "Spotify"
   if player state is stopped then return "stopped"
   set t to current track
+  -- 每個欄位先各自轉成文字；直接放進清單會是「參照」，整串轉文字會失敗
+  set vState to player state as string
+  set vName to (name of t) as string
+  set vArtist to (artist of t) as string
+  set vAlbum to (album of t) as string
+  set vPos to (player position as integer) as string
+  set vDur to ((duration of t) div 1000) as string
+  set vVol to (sound volume) as string
+  set vArt to (artwork url of t) as string
   set AppleScript's text item delimiters to tab
-  return {player state as string, name of t, artist of t, album of t, (player position as integer) as string, ((duration of t) div 1000) as string, sound volume as string, artwork url of t} as string
+  return {vState, vName, vArtist, vAlbum, vPos, vDur, vVol, vArt} as string
 end tell
 '''
 NP_CMDS = {
@@ -62,6 +71,7 @@ art_cache = {'url': None, 'raw': b''}
 
 def osa(script):
     r = subprocess.run(['osascript', '-e', script], capture_output=True, text=True, timeout=5)
+    if r.returncode: print('AppleScript 錯誤：', r.stderr.strip(), flush=True)
     return r.stdout.strip()
 
 
