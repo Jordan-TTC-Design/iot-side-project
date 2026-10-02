@@ -3,7 +3,7 @@
 
   python3 tools/shot.py out.png                 # 截圖
   python3 tools/shot.py out.png down down ok    # 先按鍵再截圖（每鍵間隔 0.3 秒）
-按鍵名稱：up down left right ok back space del tab，或單一字元（例如 3、a）
+按鍵名稱：up down left right ok back space del tab，或單一字元（例如 3、a）；go:5 直接跳到 AppId 5
 """
 import os, sys, time, termios
 from PIL import Image
@@ -16,7 +16,8 @@ def main():
     _, fd = open_port()
     time.sleep(0.3); termios.tcflush(fd, termios.TCIFLUSH)
     for k in keys:
-        os.write(fd, f'KEY {k}\n'.encode()); expect(fd, 'OK'); time.sleep(0.3)
+        cmd = f'GO {k[3:]}' if k.startswith('go:') else f'KEY {k}'   # go:5 直接跳到 AppId 5
+        os.write(fd, f'{cmd}\n'.encode()); expect(fd, 'OK'); time.sleep(0.3)
     time.sleep(0.2)
     os.write(fd, b'SHOT\n')
     n = int(expect(fd, 'SHOT').split()[1])

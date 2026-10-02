@@ -9,7 +9,7 @@ GET /usage.txt  → 每行一個帳號，Tab 分隔，給機器好解析：
 GET /news.tsv   → 今日新聞包（超過 6 小時就在背景重新產生）
 GET /tts?t=文字&r=語速 → 念出來的聲音：8-bit 無號、11025Hz、單聲道的原始 PCM（Mac 的 say 產生）
 GET /np.txt     → Spotify 正在播放：state  歌名  歌手  專輯  位置秒  長度秒  音量  封面id（Mac 上的 Spotify App，AppleScript）
-GET /np/art     → 目前專輯封面，32×32 RGB565（高位元組在前），縮成 16 色像素風
+GET /np/art     → 目前專輯封面，48×48 RGB565（高位元組在前），縮成 16 色像素風
 GET /np/cmd?c=play|next|prev|volup|voldown
 GET /           → 給人看的簡單狀態
 """
@@ -66,6 +66,7 @@ NP_CMDS = {
     'volup': 'tell application "Spotify" to set sound volume to (sound volume + 10)',
     'voldown': 'tell application "Spotify" to set sound volume to (sound volume - 10)',
 }
+ART = 48
 art_cache = {'url': None, 'raw': b''}
 
 
@@ -85,12 +86,12 @@ def now_playing():
 
 
 def album_art(url):
-    """下載封面，縮成 32×32、16 色，回傳 RGB565（高位元組在前）"""
+    """下載封面，縮成 48×48、16 色，回傳 RGB565（高位元組在前）"""
     if art_cache['url'] == url: return art_cache['raw']
     from PIL import Image
     import io
     jpg = subprocess.run(['curl', '-fsSL', '-m', '10', url], capture_output=True).stdout
-    im = Image.open(io.BytesIO(jpg)).convert('RGB').resize((32, 32), Image.BOX)
+    im = Image.open(io.BytesIO(jpg)).convert('RGB').resize((ART, ART), Image.BOX)
     im = im.quantize(16, method=Image.Quantize.MEDIANCUT).convert('RGB')
     raw = bytearray()
     for r, g, b in im.getdata():

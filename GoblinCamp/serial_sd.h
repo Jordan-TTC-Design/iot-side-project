@@ -2,7 +2,7 @@
 //   主機送 "PUT /goblin/vocab.tsv 706543\n" → 機器回 "READY"
 //   之後每收 512 bytes 回 "OK <已收>"，收完回 "DONE <大小>"
 //   "LS /goblin\n" → 列出檔案
-//   "SHOT\n" → 傳回目前畫面（RGB565），"KEY down\n" → 模擬按鍵；給 tools/shot.py 除錯用
+//   "SHOT\n" → 傳回目前畫面（RGB565），"KEY down\n" → 模擬按鍵，\"GO 5\n\" → 跳到某個 app；給 tools/shot.py 除錯用
 #pragma once
 
 void serialPut(const String& path, size_t size) {
@@ -63,6 +63,10 @@ void serialTick() {
       for (int i = 0; i < 9; i++) if (k == names[i]) e = {(Key)i, 0};
       lastInput = millis();
       cur->key(e);
+      Serial.println("OK");
+    } else if (line.startsWith("GO ")) {   // 直接跳到某個 app（AppId 的數字），測試用
+      int id = line.substring(3).toInt();
+      if (id >= 0 && id < A_COUNT) { lastInput = millis(); go((AppId)id); }
       Serial.println("OK");
     } else if (line.startsWith("LS")) {
       String dir = line.length() > 3 ? line.substring(3) : String("/");
