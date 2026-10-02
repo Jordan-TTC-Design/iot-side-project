@@ -4,6 +4,10 @@ CFG    := $(HOME)/.arduinoIDE/arduino-cli.yaml
 FQBN   := m5stack:esp32:m5stack_cardputer
 PORT   ?= /dev/cu.usbmodem101
 SKETCH ?= TextInput
+# GoblinCamp 有字型和角色圖，超過預設 1.25MB，改用 8MB flash 的分割表（app 3.2MB）
+ifeq ($(SKETCH),GoblinCamp)
+FQBN := $(FQBN):FlashSize=8M,PartitionScheme=default_8MB
+endif
 BUILD  ?= build
 DIST   ?= dist
 # 所有課程資料夾（有同名 .ino 的就算一課）

@@ -1,6 +1,10 @@
 # Cardputer ADV 練習專案
 
 M5Stack Cardputer ADV（ESP32-S3）的自學紀錄。
+> **目前主線：[`GoblinCamp/`](GoblinCamp/)** —— 哥布林營地主選單韌體（英語單字、守城打字、營火時鐘、設定…）。
+> 計畫與指令見 [`PLAN.md`](PLAN.md)，介面原型 [`docs/launcher-prototype.html`](docs/launcher-prototype.html)。
+> 下面的課程暫停中。
+
 完整路線圖：[`docs/cardputer-roadmap.html`](docs/cardputer-roadmap.html)
 （線上版：https://claude.ai/code/artifact/8003f878-2f24-44a3-a981-83d522e1f10a）
 

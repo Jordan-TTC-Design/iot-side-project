@@ -28,3 +28,11 @@ docs/.artifact-fragment.html
 .vscode/
 .idea/
 *.swp
+
+# ---- GoblinCamp ----
+# 字表授權只限學習使用，產出的 SD 卡資料不進版控（用 tools/build_vocab.py 重建）
+sd/
+tools/.cache/
+.playwright-mcp/
+backup/
+__pycache__/

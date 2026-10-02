@@ -1,0 +1,601 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cardputer 營地選單</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Sans:wght@400;600;700&family=Silkscreen&display=swap">
+<style>
+/* Layout: one device screen in the middle, keys underneath, short notes beside. Page follows theme; the screen itself is always the night camp. */
+:root {
+  --bg: #efecf4; --fg: #231c38; --muted: #6b6386; --line: #d5cfe3;
+  --bezel: #2a2440; --bezel-hi: #3a3358; --key: #f7f5fb; --key-fg: #231c38;
+  --accent: #b77712;
+  --f-ui: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --f-px: "Silkscreen", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #100c1d; --fg: #ebe5f7; --muted: #9b93b8; --line: #2c2545;
+  --bezel: #1c172f; --bezel-hi: #2c2547; --key: #241e3a; --key-fg: #ebe5f7;
+  --accent: #f2b544; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #100c1d; --fg: #ebe5f7; --muted: #9b93b8; --line: #2c2545;
+  --bezel: #1c172f; --bezel-hi: #2c2547; --key: #241e3a; --key-fg: #ebe5f7;
+  --accent: #f2b544; color-scheme: dark }
+html, body { height: 100% }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-ui); padding: 24px 16px 40px; box-sizing: border-box }
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 760px) minmax(0, 1fr); gap: 32px; align-items: start }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr) } }
+header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px }
+h1 { font-size: 22px; margin: 0; letter-spacing: .02em; text-wrap: balance }
+header p { margin: 0; color: var(--muted); font-size: 14px }
+.device { background: var(--bezel); border-radius: 18px; padding: 18px; box-shadow: inset 0 1px 0 var(--bezel-hi), 0 18px 40px -24px rgba(20, 10, 40, .6) }
+canvas { display: block; width: 100%; max-width: 100%; aspect-ratio: 240 / 135; image-rendering: pixelated; border-radius: 4px; background: #120e24; outline: none }
+canvas:focus-visible { box-shadow: 0 0 0 3px var(--accent) }
+.keys { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; justify-content: center }
+.keys button { font: 500 13px var(--f-ui); background: var(--key); color: var(--key-fg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; min-width: 44px; cursor: pointer }
+.keys button kbd { font: 11px var(--f-px); color: var(--muted); margin-left: 4px }
+.keys button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+aside { font-size: 14px; line-height: 1.7; min-width: 0 }
+aside h2 { font-size: 13px; letter-spacing: .08em; color: var(--muted); margin: 0 0 8px; font-weight: 500 }
+aside section + section { margin-top: 24px }
+.jump { display: flex; flex-wrap: wrap; gap: 6px }
+.jump button { font: 13px var(--f-ui); background: transparent; color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer }
+.jump button[aria-current="true"] { border-color: var(--accent); color: var(--accent) }
+table { border-collapse: collapse; width: 100%; font-size: 13px }
+td { padding: 4px 0; border-bottom: 1px solid var(--line); vertical-align: top }
+td:first-child { font-family: var(--f-px); color: var(--accent); width: 72px; white-space: nowrap }
+aside p { margin: 0; color: var(--muted) }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Cardputer 營地選單</h1>
+    <p>240×135 等比例原型 · 先點一下畫面，再用鍵盤操作</p>
+  </header>
+  <div>
+    <div class="device">
+      <canvas id="scr" width="960" height="540" tabindex="0" aria-label="Cardputer 螢幕原型"></canvas>
+    </div>
+    <div class="keys" id="keys">
+      <button id="k-up" data-k="up">上<kbd>;</kbd></button>
+      <button id="k-down" data-k="down">下<kbd>.</kbd></button>
+      <button id="k-left" data-k="left">左<kbd>,</kbd></button>
+      <button id="k-right" data-k="right">右<kbd>/</kbd></button>
+      <button id="k-ok" data-k="ok">確定<kbd>Enter</kbd></button>
+      <button id="k-space" data-k="space">翻面<kbd>Space</kbd></button>
+      <button id="k-back" data-k="back">返回<kbd>`</kbd></button>
+    </div>
+  </div>
+  <aside>
+    <section>
+      <h2>直接跳到</h2>
+      <div class="jump" id="jump"></div>
+    </section>
+    <section>
+      <h2>按鍵</h2>
+      <table>
+        <tr><td>; . , /</td><td>上下左右（方向鍵也可以）</td></tr>
+        <tr><td>Enter</td><td>進入、送出</td></tr>
+        <tr><td>`  Esc</td><td>回上一層</td></tr>
+        <tr><td>Space</td><td>單字卡翻面</td></tr>
+        <tr><td>1 2 3</td><td>單字卡：不會、模糊、會了</td></tr>
+        <tr><td>a–z</td><td>守城打字：直接打字</td></tr>
+      </table>
+    </section>
+    <section>
+      <h2>說明</h2>
+      <p>單字、KK 音標、新聞句子都是真資料：6000 字表加上 CMU 轉出來的 KK，新聞是 2026-10-01 的 NPR 文章。Claude 額度、Wi-Fi、天氣是示意數字。實機上的文字會換成點陣字型。</p>
+    </section>
+  </aside>
+</div>
+
+<script>
+const DATA = {"spr": {"worker": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAAChS3wfAAAB9UlEQVR42u2ZPU7EMBCFfQjS0NAvSJwAIVFzCqDlAnuAbegp9hpchIICDkGFqIMmki3/jO3xOMtqvINkkUT53jiTYOaNjdEfYy4uz+b4HBs5RjQPB89vt8GN+4+HZcB1f/j3+OeS+SAJMAC8310tw16LzwN4AH4R+Hp5dQK/n3fzNE3uZjiGa/Yc7o0nIJlPsljKXJK9QfhE5Of7fd5uNsuA4yo8AJ/NJBkegHcC9vPxP6OagB+cw/fGr/FVjVL2Wj9Bzhvojd89Bws/3Zyjg5oAqbwT2D9eo4P6Brh8b/waT14DsIfAysmWJCTV1wHi+zFYDx//DfllI2cVlsj3C3hvEdP77wTE8zGtD8ASqOgdOn7vfLUfcPL9gNz/Uaofl8RnqyesiKD4cYl84Kcpo+THJfLkOrzVj0vii06K6sik804kJ0AtRCTz2g/QfoD2A7QfoP0A7QdoP0D7AafdE6D46aF4zF9je+w5Eek8usee22WtTUIqX/TU8X57zo5K5rUnUBKxe+zwu7agSOeLmWwphCTzaFOhtRCRzCeNjabsIW+A8wBrxCc3QjAB66FBxPbUObzV4PI98S3bygd2FkSa7GTBDkuJn4hQvXyJ55TmR4vvLyIcO+xr9LDHir/qBJpX4JXic3oRxaYG9zPm+vI14lPYP6V8W2eN5L6JAAAAAElFTkSuQmCC", "scout": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAAChS3wfAAAB9ElEQVR42u2ZMU7EQAxFcwjS0NAvBQ0FQqLhDNwADkCJuAL9FlQcgRNQcQBKaOmpVtSDHMkjTzKzsT2jjRwcyUp2k2c7szuJv6frfEu3k9OjoDm3Ch4u2L7fBLwQ9vSYnlsjn1wEdnd1PBh+liRgkY8OXs8vwv3LZWLwHTcBq/zg4OtpG96+H8Lv5/UAgOExnJtLwCyPowcGDmCPo4ffo+WcWOc7+tCAi3Y/H+FxsxkMjunc2vcLWOazozk7aivkowP6F+I6oME1fG38Es/2gTC+QtC4Dkq8dAC18dGHmscEnm/PEpMmoOVr45d48RSgN8F+eBQGgVWENIpPY6luPldRaeegVb7eAREeSw8AV0TtVU4qB0IV1zp+bc7eD/B+gPcD/nk/IGcSPW6Rj3oaa2daRkr0uEk+p6BKNqfHLfITPT1uKUn1uEU+cTR2IK3ELPMTSartB2j42vgl3vsB3g/wfoD3A7wf4P0A3w4zeqZ57ZxfBT8uIPAhxH0NWecnmhpWWen6uqQQscona+y4tt73PbueNs1zNXXJiXV+oqnBcH0d9py5ZJ0vjqamErTMJ00FbSVmmY8OJFo+90qqvYGl4scEWslhU/ExOC0itPNQq+aWjJ8kUCNp0UcNu0T85glofrna+FX/gJyiOrQmbxGfw/4BLGtRqPyZfJQAAAAASUVORK5CYII=", "sage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAAChS3wfAAACRUlEQVR42u2ZMU4DQQxF9xBsQ0MfCloKaDgD4gLkFIiKEnoKTkCZE1AhOiRKcgeoCHWQR/LK4/Xs2DMB5GQiWQyw73vxJma+p+sSr4PDvfXJ+SIErDvjyyUPF2IA+P1+FgJFMLaSpxXLhSTinY8qePO6CHHxeBuF9gm45OEXcBGAx9fzEAjy71NPwDMfBJZ390EAPjd93w8ArOFnsIZrUjfgmR8qSINXTvMEvPIjga/Pt/XVbBYC1tYb8MZHTQQuWq0+orA0Ia98VMnnl6cBhvVk5YSnUMLX5s/xWQ3+NqLV0wjkeEsBS/JzDTOP8Px0PwRUDtcQ2gJ45QeBh8sjMbRPoJSvzZ/jVZ4AG4UEa01FitcWsDQ/zVH0x/PPEO2q2iYkGRMLX5tf4s1ukkNFIhN6v52/9n7bPKDNA3Z9HsC3kRjaJ+CSl3ZQ0n5aY0Y88oOfzgnk/LhXvr0DuJOTQnsDHvmoiaQEtE3IKx9VEsdJdKxksaIlfG3+HG+eB0hhmQdY2E3kr74H7qd5WP24N77NA9o8oM0D2jxgt+cBtHopP73VvMZT57qwZ350zMzP2C1NyCVP4dQpq+b/sFc+8tQ0+Hl7SsQ7r9qLW8/oPfFJATxjh69T3dQ7PzpjlyYs2q2sV34QoV6anrNrO7FnfjTYoBMVq5+gI6oSviY/dn4rHwTQQ4MIfLXuxakPB41SviY/slY+srMgYrKTE3bYS/6RiNbLT/ElZubf8tMmUjMPoBp/nV+aDRR7+FJ/XePLN5Ffw/4AvJ7TDTQtx2MAAAAASUVORK5CYII=", "golden": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAAChS3wfAAACFUlEQVR42u2ZPU4EMQyF5xBsC/3SUlBQcSrEFeg5ByegWiFKSrgBBdCw1IMc4VHicRxnsyDebFay5i/fy8gMSZ4zDOJ3cno0brdvIx/jczoOhR8kTw+lgBaxQHwOzdPJx+YiPOQYX69C0P044jYsiM4nSaAg8PH2OATfk9csFmcTmQ8CLze3k8DX8+W4Wq2mxnRO9/ia2soXQOZnWbQyN8veQvhp8OBGn+9P4/V6HYLO+X5uNEXnk+lDZizOXOkFUPmZAH8+8WckBbTpR35+tXxr/xYvv4DASxFqdHd2rob2/1PD8xS0K+/pn6KGVweSXQXQ+XaBH43/moDiUtp6eY8INM+DyObhPruW5mfWKIzKJ4OIXDvLa+svoEUt39q/tvaPY/BYSrnUdIFOvd/uv+l9ez2g1wNsAY8fR+JnTioHc5T8OCKf+GmPgOXHEfkkix4By4+j8sUBRBtIlsYHAVotWVF6AWS+WiCefmD5v64HlNYgLf23utFeD+j1gF4P6PWAXg84+HqAtqKq8eOQvOaVa5aR6PysJsC7rHKP3SpCIPPqHntulzWXRXQ+8dQy5H57bhpC5rN77NZO69J4dZeXgvfY6eiZi5F5VaCYtQXxk4DcXy9ZWVg+J+I1Eei821XVLkWR+cNOgOWpvYMQLG956qKXXgCfWMl49KydhjQNr0XdZ/81tQTTU+/qr1t8+T7697DfuatN9G90dVoAAAAASUVORK5CYII=", "brute": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAAChS3wfAAACBklEQVR42u2ZPU7EQAyFc4hNQ0NDtRQ0tDR7Ao6ABAVnoKSFmoIzcBhKOAQVos5qInnlmXhm/BMtstaRrI20+eyslcz6vRmGxnF+uZlSDMrDNZ/Ah5uzOTRJvPOn2wB4bHaPF1lwHyfXfLrg7vV6ev64nf6+dvN5CnzeSuKaB/j75W1O8PvzeeheOofvakm889njky5K0NN2Owck6D1G3vlDAkiCA3/XYzW8tb6EJ3PgVbNcQCBqqyoU1PLW+lJ+8RrAD0gXlZ0rA67BCSR86/3V1i/zqHh8E9CpMjjFvfJZgvf7KzKaCdA7qOGt9Tm8aBGswdxhhOK5DdTUxw2o8exJsFw5OUMIl+/lsNSv1ZPcv7kBpQpbu4FSXqUKS+DYstRa33q/4QeEHxB+wGYxREj1uEu+HCXx7CzR4y55rKdrczRXj3vkF4NEqaSketwjn42iNU+N6wdIeWt9CR9+QPgB4QeEHxB+QPgB4QeEHxAHp4vabrrma3LyVPhsm1m6P++exzDsrY/jKPorcsvXNDVsL/eSeOfJYQL219Mnd5DxzJNJJEOQe76lq7mTmGee1NQ9EcPR5JIfsEZ9yltgN4DS0dz/UoqHHFpeU5/yBdgNoHQ4V1K2/AAtf8z6TT0vWYQ88wN2VTVyGOewsP9Vf9UbYK++K9fXeBFNU8OiyKwewlp5qGMPTue3gVYeya4AAAAASUVORK5CYII=", "queen": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAADgCAYAAACzdWAwAAAFaklEQVR42u2dMW8TMRTH+3E6V50QQoihAzNCjB06d2LgMyDmzl1YEBMDn4ChA3MnhBgZOzCgCCnIJzlyLmf7+Rzf8+v9IllN0/z97txc4v/P7zknJ5Hb6/Mn27CdFN5M653g4e5q++fuYmjufkknpvWh2P3c/r4p6sS03otTLdWJdf3uuvFP/vfzbmihOHcAZvWh8Oz0Ymi+A/97ahSt6/c6ePXhx9bdfAfu5h6THoBF/V4Hf28/DsL7y+uhufvuMekBWNQPHXy/eTY0P3Lj5v8eOwDL+l0nl+/vd22z2QwtfCz3JuQC1ehr46f07tiynwL+SU7w6/mbofnA2Q6Cd+I5+tr4Ob1oHjAexfHoSz6GYnrJCdTGD1+BRXr3hxdXX3ZPTt2PXYOW9UMH/prJtdgBWNbvvQTfvTwbWux3iQMLNaX62vip2CJTNH7iHEsZakr1tfFrYsMD4AHwgJXyAIlYakYs6ic7cC8f1+YegCX9QQehcNyJ5ACs6bkEQj+dazk/blHPAIR20nvo0E+7n1I7W6OvjZ/SZ2eFYz8edjCHB4z1pTxgTvyQBxTp4QHwAHgAPAAeAA+AB8ADVp0cMSXy6+uSWZxlfbIDt7buV1hjnVjXRzsI19rn/Aes6CftZJhnI3kJWtZHO5Csyz8G/cHsyVtJ76+ln8FjvcTHt4rvtVJ9co1eOqU0rR976nGLeulHohd56twBWNaLPHXJdeh1Ei/fS/yjeupj2Fmt+PAAeAA8gHoB6gWoF+gk3//b2/Ohma8X8Cci1fsWzuRaxRfn28c6kehTU9Il6gWyU2JJvn7uJCT5+imstUS9QDY/IJVvn5pd1ebra+ub1wt0rSc/gPyANuvzlvRN1uct6uEB8AB4ADwAHgAPMLh/gP9vp/TRdcoaHhAGl+inDuJR7B/g5tqhPjwAr49ZWu34i/jx3vXN9w+o9fOt48MD4AHwgPl+OpabH6sh6DF+tZ+WXqOt/Pyx4sMD4AHwAHjAunnAOMk47ERavW1NDxBhP8GG6/N+Cqq1n6Ak/p6fdhbSCT6dPh2aux/aypwft6rfq7+f6qCkft+iHh4AD4AHkB9AfgA8AB4AD4AHkB9AfgDfL5D107Xr+9r5AQd9lPrxm9vPB5ONJfW1PGEcP7u+7gTjVlIvcGx9Kklibvzs+rzkAKT6668P0VQbLb3YT+cWNyX62ACq6eEB8AB4ADwAHgAPWMaPSyytSnypny7d0Gysj21spB1f7KdTJ5DTp3aGUo0v9dOxDkr8eI2+VfwiP507gNZ+vkV8sZ9Opbtb1vN9gzk/Tb2Agfp/9g8gPwAeAA+AB8AD4AHkB5AfQH4A+QHkB3S5n+Dq6gWm6veleq8N+2gZHx4wZSmL/bR1PTwAHgAPgAfAA+AB8AB4ADxgrTzAP7lnPx8rf4UHHIMHuKli736+Nj+giAfU+HlrengAPAAeAA+AB7CfYKWfZj9BeAA8AB6wCh6Qexdv7eebxC/x07nd4Vv7+Rbx4QHUC8AD4AHUC8AD4AHwAPIDyA/oxM+r3rT9fDcnr+Hnuzh5NT/ewwBoru939d9vtb+/5Ouy1AdApWChpwGY8tPjl/LR/XgPA5DL1/ff59ci37+bQVBfn9ceAFU/3svHoJafVz95VT/ewwCo+/FeLgF1P97LQKj68V4GAR4AD4AHwANWxwNWb4dV1ud75AFhm5PvX6LvjgdMtRIeUKqHB8AD4AHwAHgAPAAeAA/oQk+9APUC1Auwn6Dm/gEt8xNM7B+gvqFiL/sHLMojSvYTjJWsLKWPfWFjjV7s51Oefim9a7FBrNGL/HzuXXgJferr9mr01AtQL0C9APUCXfCAJfX/AXaxKrSjR6sYAAAAAElFTkSuQmCC", "tent": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAYCAYAAACIhL/AAAABQElEQVR42u3VPQrCQBAFYA9gYWFhYWklYilBrCV4BBHxBFYWKT2AlYVYiJWVlQcQK8/gOSzsIzMw4bFJJrvRRIssPJb8wHyZ7LK1WjWqUY3fjV67Ff41bjP3QhdkqR/kCszzQV9B/i2QCj0uAccFWQoQcbZIen4PFpzCkVTgup0xTGatKD07zyYRsFCk4EyghhSgxAr4XHZCSl5cUpKQJg6jIvMCjys/AsmiRyQW5Z07HjKGZkkmkGDhbcRxxUnoullvcNKQAjSDXcwE2naRiq2nnjWQshz0OYSSGZE0pwNfO2ug4DBJQPP3CxBjYmOFou4REJDaDtRwiMQlIF1OQ8aA/LLf5cgvkNARlHYMFQHEJB41AkKYLU4D4hpFpJbYYY2gaDFDZ/PgtC4KMnMX7g8ntVPa/U/jdFQRVLsue7wBDkR5VXnCs/sAAAAASUVORK5CYII=", "zombie": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAAChS3wfAAABuklEQVR42u2aOw7CMAyGcxIGJiZGzsahOAMTx0CcgIGBEQkUpKDUdRs/KOVXXSmiSP1sxzGJ7ZISc61X2yc3kvCC5vODt+uFHRIh0HyBn4/7e1ABp+NhVAg6P+o9jQGo/EfAZr17jwKW71IDUPmOgP3t/BGQ77UGIPK9EKKe1IYgGt8Rkh+uP7W7MCrfOUMzXLwmOUuL8iFee4Zr9VMZlG86obWLtgS0eKkDp5QhckDxWg2VUJI4AJWffQXmjkD292P9HXO81IFW/bUOjpfWEr3NTOw9sgqU18qw6q8Z1epzE1ALIDu5lvfq5xZAtfr1BOi95bLwXv1em6MfsPh+wFhNLT2GEPnJz+F/58MBXAKhSSjQ+XBAS4h0F0bmox8Q/YDoB0Q/IPoB0Q+IfsDC+wFDNfVi+KHd1BKGcHyrptYcg4h8qpMGax6AzLMC6resFgOQ+EEB5X271QAUfjSdzII8qTAC38um6Ht2aU2OzLPpqKU3D8tzYWRRjsr3NhJtNUXrb8sEvPppL8CdCS42AiwryK2Clp1Tf6rDxmOA+h9aE+k3rT41wDuJX+t3RQE12lpfW2vyb+mXsC8kku7YvPoqkwAAAABJRU5ErkJggg==", "ogre": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAAChS3wfAAAB3UlEQVR42u2ZS04DMQyGcxIWXbFiydk4FGdgxTEQJ2DRBUukQiocZRLH8WPUwcEjRW2n+WzHeU3+SennOt09XC5fn9eSv1Olrpd+L+98MZA/zx/vZKnrrsIXI7kCZGhk4PXluYcX4BMne5wAvPLFwP3p8VpaEO7PAvDKbww8nd86A/keNwCPPDqEsGxKhqAnPsE2AZWwT1hFWwP1NqPhrf41fLcN5kqQHSize3XmtbzVv5aHZGyGDncfbbMp5esesPrHRqCIb2/UGWuDhv+oBHjjD++Bo0fgZgHB5nQ3Z5r6o9V4xFMJ1PgfJYTiyWuWYS7LbfAe/rlryjQBGCAy0EwHKW/1P+oAKuFkA7Df0kvKW/2r4g09IPSA7fyZnalnz+IeefZ5mhOARz4SUB8UZmUUgGc+EtAeFymY0gM0vNW/hg89IPSA0ANCDwg9IPSA0ANCDxDrAivzxYD4ILEIzz5TcxYwj3x5pFQdJxfgSQP1m1ZNAB74qQF4764N4K/zLFUlG+LMQY88+z37bCX2zHfZFO+lK/DYUJI8WXnnu8VkqKMx+Lonbukf0wjSf+nBXUeApgexXpCyR/pPmLRkaYR2CuzlX9X7I21N24hb+zeNgjZo7fnaqiFY/XPYb1uLgiW/ukxSAAAAAElFTkSuQmCC"}, "cards": [{"w": "counter", "l": 4, "pos": "n/v/adj/adv", "zh": "櫃台；反駁；反對地", "ex": "She placed the coffee on the counter.", "exZh": "她把咖啡放在櫃台上。", "kk": "ˋkaʊntɚ"}, {"w": "penny", "l": 3, "pos": "n", "zh": "便士；一分錢", "ex": "He found a penny on the ground.", "exZh": "他在地上發現了一分錢。", "kk": "ˋpɛnɪ"}, {"w": "imply", "l": 4, "pos": "v", "zh": "暗示；意味著", "ex": "Her silence seemed to imply agreement.", "exZh": "她的沉默似乎暗示著同意。", "kk": "ˏɪmˋplaɪ"}, {"w": "creator", "l": 3, "pos": "n", "zh": "創造者；創作者", "ex": "He is the creator of this popular video game.", "exZh": "他是這款熱門電玩遊戲的創作者。", "kk": "kriˋetɚ"}, {"w": "export", "l": 3, "pos": "n/v", "zh": "出口；輸出", "ex": "Taiwan exports many electronic products worldwide.", "exZh": "台灣向全球出口許多電子產品。", "kk": "ˋɛkspɔrt"}, {"w": "heal", "l": 3, "pos": "v", "zh": "治癒；痊癒", "ex": "The wound took two weeks to heal.", "exZh": "這個傷口花了兩週才痊癒。", "kk": "hil"}, {"w": "fiction", "l": 4, "pos": "n", "zh": "小說；虛構", "ex": "She enjoys reading science fiction novels.", "exZh": "她喜歡閱讀科幻小說。", "kk": "ˋfɪkʃən"}, {"w": "dinosaur", "l": 3, "pos": "n", "zh": "恐龍", "ex": "We saw a huge dinosaur in the museum.", "exZh": "我們在博物館看到一隻巨大的恐龍。", "kk": "ˋdaɪnəˏsɔr"}, {"w": "violate", "l": 4, "pos": "v", "zh": "違反；侵犯", "ex": "Drivers who violate the law will be fined.", "exZh": "違反法律的駕駛人將被罰款。", "kk": "ˋvaɪəlet"}, {"w": "tank", "l": 3, "pos": "n", "zh": "坦克", "ex": "We saw a big tank in the museum.", "exZh": "我們在博物館看到一輛大坦克。", "kk": "tæŋk"}], "typing": ["tolerate", "hammer", "consult", "murderer", "launch", "assign", "silk", "boot", "trader", "pollute", "privilege", "universal", "wallet", "gallery", "gulf", "stale", "hatred", "razor", "negotiate", "pronounce", "vacant", "marker", "biography", "wisdom", "bury", "extend", "miserable", "statue", "shorten", "beggar", "barrel", "teenage", "stiff", "frown", "scatter", "promising", "sometime", "wealth", "lousy", "fertile", "superior", "injure", "sincere", "harsh", "amuse", "memorable", "hesitate", "craft", "relief", "chimney", "navy", "bare", "ditch", "transport", "financial", "clothe", "terror", "emerge", "intimate", "install", "neglect", "bravery", "coward", "luxury", "involve", "pioneer", "fare", "comedy", "warmth", "lettuce", "pitch", "farewell", "strategy", "knit", "hollow", "spaghetti", "impress", "drowsy", "constant", "breed", "criticism", "dumb", "sexy", "dumpling", "advanced", "moth", "wherever", "quilt", "curse", "evident", "feast", "accompany", "conductor", "landmark", "pause", "humor", "release", "precious", "genuine", "clay", "spoil", "original", "republic", "seize", "slight", "text", "badly", "marvelous", "tube", "someday", "vain", "portable", "insult", "intuition", "invasion", "intensity", "carpenter", "monthly", "romantic", "inventor"], "news": {"src": "NPR", "date": "2026-10-01", "title": "'It's a nightmare.' Former refugee, professor on Trump's new Medicaid policy", "words": [{"w": "frantic", "l": 6, "zh": "驚慌的；瘋狂的", "kk": "ˋfræntɪk", "s": "Mustafa Rfat has been getting frantic phone calls recently from refugees with disabilities."}, {"w": "vulnerable", "l": 5, "zh": "脆弱的；易受傷害的", "kk": "ˋvʌlnɚəbəl", "s": "So it was a very, very difficult and vulnerable situation."}, {"w": "chronic", "l": 5, "zh": "慢性的；長期的", "kk": "ˋkrɑnɪk", "s": "When he arrived in the U.S. as a refugee from Iraq in 2011, the chronic condition that affects his spine had gotten worse."}, {"w": "enroll", "l": 6, "zh": "登記；註冊", "kk": "ɛnˋrol", "s": "Only a small portion of legal immigrants have been eligible to enroll in Medicaid, including refugees and asylees."}, {"w": "navigate", "l": 6, "zh": "導航；航行", "kk": "ˋnævəˏget", "s": "Now, he's trying to help refugees with disabilities facing the challenges of navigating life in the U.S."}, {"w": "medication", "l": 5, "zh": "藥物；藥物治療", "kk": "ˏmɛdəˋkeʃən", "s": "I missed my medications for a long time."}, {"w": "coverage", "l": 5, "zh": "報導；涵蓋範圍；保險範圍", "kk": "ˋkʌvɚədʒ", "s": "\"I spent these past two weeks just talking with so many of them, literally just terrorized by the reality of losing coverage.\""}, {"w": "administration", "l": 5, "zh": "行政；管理；政府當局", "kk": "ædˏmɪnɪˋstreʃən", "s": "As of Oct. 1, refugees are losing access to Medicaid across the country because of H.R. 1, the Trump administration's tax and spending law."}]}};
+const W = 240, H = 135, S = 4;
+const cv = document.getElementById('scr'), ctx = cv.getContext('2d');
+ctx.scale(S, S); ctx.imageSmoothingEnabled = false;
+const P = { sky0: '#100c20', sky1: '#2b2050', panel: '#1b1530', panel2: '#251d40', line: '#3a2f62', text: '#efe6d2', dim: '#968bb4',
+  amber: '#f2b544', amberD: '#3b2a12', ink: '#1a1226', green: '#86d05e', red: '#ec6a52', blue: '#7ccaf2', ground: '#24391f', ground2: '#35552c', pink: '#e9a0c4' };
+const TC = '"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif', LAT = '"Noto Sans","Helvetica Neue",Arial,sans-serif', PX = '"Silkscreen",ui-monospace,monospace';
+const img = {}; for (const k in DATA.spr) { img[k] = new Image(); img[k].src = DATA.spr[k]; }
+
+// ---------- drawing helpers ----------
+function R(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
+function T(s, x, y, o = {}) {
+  ctx.font = `${o.w || 500} ${o.s || 9}px ${o.f || TC}`; ctx.fillStyle = o.c || P.text;
+  ctx.textAlign = o.a || 'left'; ctx.textBaseline = o.b || 'alphabetic'; ctx.fillText(s, x, y);
+  return ctx.measureText(s).width;
+}
+function TW(s, o = {}) { ctx.font = `${o.w || 500} ${o.s || 9}px ${o.f || TC}`; return ctx.measureText(s).width; }
+function wrap(s, maxW, o) { const words = s.split(' '), lines = []; let cur = '';
+  for (const w of words) { const t = cur ? cur + ' ' + w : w; if (TW(t, o) > maxW && cur) { lines.push(cur); cur = w; } else cur = t; }
+  if (cur) lines.push(cur); return lines; }
+function wrapCJK(s, maxW, o) { const lines = []; let cur = '';
+  for (const ch of s) { if (TW(cur + ch, o) > maxW && cur) { lines.push(cur); cur = ch; } else cur += ch; }
+  if (cur) lines.push(cur); return lines; }
+function spr(name, frame, x, y, sc = 2, flip = false) {
+  const im = img[name]; if (!im.complete) return;
+  const sx = (frame % 4) * 16, sy = Math.floor(frame / 4) * 16;
+  ctx.save(); ctx.translate(Math.round(x) + (flip ? 16 * sc : 0), Math.round(y)); if (flip) ctx.scale(-1, 1);
+  ctx.drawImage(im, sx, sy, 16, 16, 0, 0, 16 * sc, 16 * sc); ctx.restore();
+}
+function bitmap(rows, x, y, c) { ctx.fillStyle = c; rows.forEach((r, j) => { for (let i = 0; i < r.length; i++) if (r[i] === '#') ctx.fillRect(x + i, y + j, 1, 1); }); }
+function bar(x, y, w, h, frac, c, bg = P.panel2) { R(x, y, w, h, bg); R(x, y, Math.round(w * Math.max(0, Math.min(1, frac))), h, c); }
+function pctColor(p) { return p >= 85 ? P.red : p >= 60 ? P.amber : P.green; }
+const pad = n => String(n).padStart(2, '0');
+const WEEK = '日一二三四五六';
+
+// ---------- icons (10×10) ----------
+const ICON = {
+  book: ['..........', '.###..###.', '#...##...#', '#.#.##.#.#', '#...##...#', '#.#.##.#.#', '#...##...#', '####..####', '..........', '..........'],
+  news: ['#########.', '#.......##', '#.###.#.##', '#.###.#.##', '#.......##', '#.#####.##', '#.#####.##', '#.......##', '#########.', '..........'],
+  sword: ['........##', '.......###', '......###.', '.....###..', '#...###...', '.#.###....', '..###.....', '.###......', '##.#......', '#...#.....'],
+  spark: ['....#.....', '.#..#..#..', '..#.#.#...', '...###....', '#########.', '...###....', '..#.#.#...', '.#..#..#..', '....#.....', '..........'],
+  remote: ['.#.#.#....', '..........', '...####...', '..#....#..', '..#.##.#..', '..#....#..', '..#.#.##..', '..#....#..', '..#.##.#..', '...####...'],
+  fire: ['....#.....', '...##.....', '...###....', '..####.#..', '..#####...', '.###.###..', '.##...##..', '.##...##..', '..#####...', '#.#.#.#.#.'],
+  gear: ['....##....', '.#.####.#.', '..######..', '.###..###.', '####..####', '####..####', '.###..###.', '..######..', '.#.####.#.', '....##....'],
+};
+
+// ---------- shared state ----------
+const st = {
+  settings: { wifi: 'HomeNet-5G', vol: 6, bright: 7, sleep: 3, idleClock: true, tz: 'Asia/Taipei', level: 3, acBrand: 1 },
+  claude: { acct: 0, accounts: [
+    { name: '個人', h5: 42, wk: 61, r5: Date.now() + (78 * 60 + 20) * 1000, rwk: nextDow(4, 8) },
+    { name: '公司', h5: 88, wk: 73, r5: Date.now() + (23 * 60 + 5) * 1000, rwk: nextDow(1, 9) } ], updated: Date.now() - 2 * 60 * 1000 },
+  ac: { power: true, temp: 26, mode: 0, fan: 0, swing: true },
+  vocab: { i: 0, flip: false, done: 0, known: 0 },
+  best: 2340,
+  toast: null,
+};
+function nextDow(dow, hour) { const d = new Date(); d.setHours(hour, 0, 0, 0); let add = (dow - d.getDay() + 7) % 7; if (add === 0 && d < new Date()) add = 7; d.setDate(d.getDate() + add); return d.getTime(); }
+function toast(msg) { st.toast = { msg, t: performance.now() }; }
+
+// ---------- sound ----------
+let ac = null;
+function blip(f = 880, d = 0.04) {
+  if (!st.settings.vol) return;
+  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; o.frequency.value = f;
+    g.gain.value = 0.015 * st.settings.vol; o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + d);
+  } catch (e) {}
+}
+
+// ---------- status bar ----------
+function statusBar(title) {
+  R(0, 0, W, 12, P.panel); R(0, 12, W, 1, P.line);
+  const now = new Date();
+  if (title) T('‹ ' + title, 4, 9, { s: 8, w: 700 });
+  else T(`${pad(now.getHours())}:${pad(now.getMinutes())}`, 4, 9, { s: 8, f: PX });
+  const a = st.claude.accounts[st.claude.acct];
+  let x = title ? 112 : 46;
+  if (!title) { bitmap(['.#.', '###', '.#.'], x, 4, P.amber); T('5H', x + 5, 8.6, { s: 6, f: PX, c: P.dim });
+    bar(x + 16, 4, 22, 4, a.h5 / 100, pctColor(a.h5)); T(a.h5 + '%', x + 41, 8.6, { s: 6, f: PX });
+    T('↻' + fmtDur(a.r5 - Date.now(), true), x + 61, 8.6, { s: 6, f: PX, c: P.dim }); }
+  if (title) T(`${pad(now.getHours())}:${pad(now.getMinutes())}`, 196, 9, { s: 7, f: PX, a: 'right' });
+  // wifi
+  for (let i = 0; i < 3; i++) R(203 + i * 3, 8 - i * 2, 2, 2 + i * 2, st.settings.wifi ? P.text : P.line);
+  // battery
+  R(215, 3, 18, 7, P.dim); R(216, 4, 16, 5, P.panel); R(233, 5, 1, 3, P.dim); R(217, 5, 10, 3, P.green);
+}
+function fmtDur(ms, short) { ms = Math.max(0, ms); const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+  if (short) return `${h}:${pad(m)}`; const d = Math.floor(h / 24);
+  return d ? `${d} 天 ${h % 24} 小時` : `${h}:${pad(m)}:${pad(ss)}`; }
+
+// ---------- camp scene (reused by home + clock) ----------
+const stars = Array.from({ length: 28 }, (_, i) => ({ x: (i * 53) % 240, y: 14 + (i * 37) % 70, p: i * 0.7 }));
+const sparks = [];
+const gobs = [
+  { sp: 'worker', x: 8, dir: 1, v: 9, pause: 0 },
+  { sp: 'scout', x: 60, dir: -1, v: 14, pause: 1.5 },
+  { sp: 'sage', x: 30, dir: 1, v: 6, pause: 3 },
+];
+function camp(x0, y0, w, h, t, dt, opts = {}) {
+  ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, w, h); ctx.clip();
+  const g = ctx.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, P.sky0); g.addColorStop(1, P.sky1);
+  ctx.fillStyle = g; ctx.fillRect(x0, y0, w, h);
+  for (const s of stars) if (s.x < w) { const a = 0.35 + 0.65 * Math.abs(Math.sin(t * 0.8 + s.p)); ctx.globalAlpha = a; R(x0 + s.x, s.y, 1, 1, '#fff7d6'); }
+  ctx.globalAlpha = 1;
+  // moon
+  ctx.fillStyle = '#f6eec8'; ctx.beginPath(); ctx.arc(x0 + w - 16, y0 + 13, 5, 0, 7); ctx.fill();
+  ctx.fillStyle = P.sky0; ctx.beginPath(); ctx.arc(x0 + w - 13.5, y0 + 11.5, 4.5, 0, 7); ctx.fill();
+  const gy = y0 + h - (opts.groundH || 30);
+  R(x0, gy, w, h, P.ground); for (let i = 0; i < w; i += 7) R(x0 + i, gy, 3, 1, P.ground2);
+  for (let i = 3; i < w; i += 13) R(x0 + i, gy + 8 + (i % 3) * 5, 2, 1, P.ground2);
+  // tent + fire (crop main tent and fire from the stage sheet)
+  const tx = x0 + (opts.tentX ?? 22), ty = gy - 44;
+  if (img.tent.complete) ctx.drawImage(img.tent, 0, 0, 32, 24, tx, ty + 0, 64, 48);
+  // fire glow + sparks
+  const fx = tx + 10, fy = gy - 6;
+  ctx.globalAlpha = 0.18 + 0.06 * Math.sin(t * 9); ctx.fillStyle = P.amber; ctx.beginPath(); ctx.arc(fx, fy, 14, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+  if (Math.random() < dt * 6) sparks.push({ x: fx + (Math.random() * 6 - 3), y: fy - 8, life: 1, cx: x0 });
+  for (let i = sparks.length - 1; i >= 0; i--) { const s = sparks[i]; if (s.cx !== x0) continue; s.y -= dt * 14; s.x += Math.sin(t * 5 + i) * dt * 4; s.life -= dt * 0.9;
+    if (s.life <= 0) { sparks.splice(i, 1); continue; } ctx.globalAlpha = s.life; R(Math.round(s.x), Math.round(s.y), 1, 1, s.life > .5 ? '#ffe28a' : P.red); ctx.globalAlpha = 1; }
+  // princess by the fire
+  const pf = opts.sleep ? 0 : Math.floor(t * 2) % 4;
+  spr('queen', pf, tx + 22, gy - 30, 2);
+  // goblins
+  for (const gb of gobs) {
+    if (opts.sleep) { ctx.save(); ctx.translate(x0 + gb.x + 16, gy - 8); ctx.rotate(-Math.PI / 2); spr(gb.sp, 0, -16, -16, 2); ctx.restore();
+      const zt = (t * 0.8 + gb.x) % 2; ctx.globalAlpha = 1 - zt / 2; T('z', x0 + gb.x + 26 + zt * 4, gy - 16 - zt * 8, { s: 6 + zt * 2, f: PX, c: P.blue }); ctx.globalAlpha = 1; continue; }
+    if (gb.pause > 0) { gb.pause -= dt; spr(gb.sp, Math.floor(t * 1.5) % 2 ? 0 : 1, x0 + gb.x, gy - 30, 2); continue; }
+    gb.x += gb.dir * gb.v * dt;
+    if (gb.x > w - 32) { gb.x = w - 32; gb.dir = -1; gb.pause = 1 + Math.random() * 2; }
+    if (gb.x < 0) { gb.x = 0; gb.dir = 1; gb.pause = 1 + Math.random() * 2; }
+    spr(gb.sp, 8 + Math.floor(t * 8) % 4, x0 + gb.x, gy - 30, 2, gb.dir < 0);
+  }
+  ctx.restore();
+}
+
+// ---------- screens ----------
+const MENU = [
+  { id: 'vocab', label: '英語單字', icon: 'book', c: P.green, val: () => `Lv${st.settings.level} · ${Math.max(0, 12 - st.vocab.done)}` },
+  { id: 'news', label: '今日新聞', icon: 'news', c: P.blue, val: () => 'NPR · 8 字' },
+  { id: 'defense', label: '守城打字', icon: 'sword', c: P.red, val: () => st.best.toLocaleString() },
+  { id: 'claude', label: 'Claude 額度', icon: 'spark', c: '#e08a5f', val: () => st.claude.accounts[st.claude.acct].h5 + '%' },
+  { id: 'remote', label: '遙控器', icon: 'remote', c: P.pink, val: () => st.ac.power ? `冷 ${st.ac.temp}°` : '關' },
+  { id: 'clock', label: '營火時鐘', icon: 'fire', c: P.amber, val: () => '' },
+  { id: 'settings', label: '設定', icon: 'gear', c: P.dim, val: () => '' },
+];
+const home = { sel: 0, top: 0, slide: 0,
+  draw(t, dt) {
+    camp(0, 13, 104, 122, t, dt);
+    R(104, 13, 1, 122, P.line); R(105, 13, 135, 122, P.panel);
+    const rowH = 24, vis = 5;
+    if (this.sel < this.top) this.top = this.sel; if (this.sel >= this.top + vis) this.top = this.sel - vis + 1;
+    this.slide += (1 - this.slide) * Math.min(1, dt * 14);
+    for (let i = 0; i < vis; i++) {
+      const k = this.top + i, it = MENU[k]; if (!it) break;
+      const y = 14 + i * rowH, on = k === this.sel, dx = on ? Math.round(3 * this.slide) : 0;
+      if (on) { R(107 + dx, y + 2, 129, rowH - 4, P.amber); R(105, y + 2, 2, rowH - 4, P.amber); }
+      bitmap(ICON[it.icon], 112 + dx, y + 7, on ? P.ink : it.c);
+      T(it.label, 127 + dx, y + 15.5, { s: 9, w: on ? 700 : 500, c: on ? P.ink : P.text });
+      const v = it.val(); if (v) T(v, 232 + dx, y + 15, { s: 7, a: 'right', c: on ? P.ink : P.dim, f: /[一-龥]/.test(v) ? TC : PX });
+    }
+    // scrollbar
+    const th = Math.round(120 * vis / MENU.length), ty = 14 + Math.round((120 - th) * this.top / (MENU.length - vis));
+    R(238, 14, 1, 120, P.line); R(237, ty, 3, th, P.dim);
+    statusBar();
+  },
+  key(k) {
+    if (k === 'up') { this.sel = (this.sel + MENU.length - 1) % MENU.length; this.slide = 0; blip(660); }
+    if (k === 'down') { this.sel = (this.sel + 1) % MENU.length; this.slide = 0; blip(660); }
+    if (k === 'ok') { blip(990, .06); go(MENU[this.sel].id); }
+  },
+};
+
+const vocab = {
+  draw(t) {
+    R(0, 0, W, H, P.panel); statusBar('英語單字');
+    const v = st.vocab, c = DATA.cards[v.i % DATA.cards.length];
+    // header row
+    R(6, 17, 22, 10, P.amber); T('Lv' + c.l, 17, 25, { s: 7, f: PX, a: 'center', c: P.ink });
+    T(c.pos + '.', 32, 25, { s: 8, f: LAT, c: P.dim });
+    T(`今日 ${v.done} / 12`, 234, 25, { s: 7, a: 'right', c: P.dim });
+    bar(150, 19, 36, 3, v.done / 12, P.green);
+    // word + KK
+    T(c.w, 8, 47, { s: 19, w: 700, f: LAT });
+    T(`[${c.kk}]`, 8, 61, { s: 10, f: LAT, c: P.blue });
+    if (!v.flip) {
+      T('Space 看答案', 120, 92, { s: 9, a: 'center', c: P.dim });
+      const by = Math.sin(t * 3) * 1.5; spr('sage', 0, 198, 64 + by, 2);
+      R(178, 52, 18, 10, P.panel2); T('?', 187, 60, { s: 8, f: PX, a: 'center', c: P.amber });
+    } else {
+      T(c.zh, 8, 78, { s: 11, w: 700, c: P.amber });
+      const lines = wrap(c.ex, 224, { s: 8, f: LAT }).slice(0, 2);
+      let y = 92;
+      for (const ln of lines) { let x = 8;
+        for (const wd of ln.split(' ')) { const hit = wd.toLowerCase().replace(/[^a-z]/g, '').startsWith(c.w.toLowerCase());
+          x += T(wd + ' ', x, y, { s: 8, f: LAT, c: hit ? P.amber : P.text, w: hit ? 700 : 400 }); }
+        y += 10; }
+      T(c.exZh, 8, y + 1, { s: 8, c: P.dim });
+    }
+    // footer
+    R(0, 123, W, 12, P.panel2);
+    [['1', '不會', P.red], ['2', '模糊', P.amber], ['3', '會了', P.green]].forEach(([n, s, col], i) => {
+      const x = 8 + i * 58; R(x, 125, 8, 8, col); T(n, x + 4, 132, { s: 6, f: PX, a: 'center', c: P.ink }); T(s, x + 11, 132, { s: 8, c: P.text }); });
+    T('🔊 Enter', 234, 132, { s: 7, a: 'right', c: P.dim });
+  },
+  key(k) {
+    const v = st.vocab;
+    if (k === 'space') { v.flip = !v.flip; blip(740); }
+    if (k === 'ok') { toast('播放發音（實機從 SD 卡讀音檔）'); blip(520, .1); }
+    if (['1', '2', '3'].includes(k)) { if (!v.flip) { v.flip = true; return; }
+      v.done++; if (k === '3') v.known++; v.i++; v.flip = false; blip(k === '3' ? 1180 : k === '2' ? 880 : 440, .06); }
+    if (k === 'right') { v.i++; v.flip = false; } if (k === 'left') { v.i = (v.i + DATA.cards.length - 1) % DATA.cards.length; v.flip = false; }
+    if (k === 'back') go('home');
+  },
+};
+
+const news = { sel: 0, top: 0,
+  draw() {
+    R(0, 0, W, H, P.panel); statusBar('今日新聞');
+    const n = DATA.news;
+    T(`${n.src} · ${n.date}`, 6, 23, { s: 7, f: PX, c: P.blue });
+    T(`${n.words.length} 個 Lv4+ 字`, 234, 23, { s: 7, a: 'right', c: P.dim });
+    const tl = wrap(n.title, 228, { s: 9, w: 700, f: LAT }).slice(0, 2);
+    tl.forEach((l, i) => T(l, 6, 35 + i * 11, { s: 9, w: 700, f: LAT }));
+    const y0 = 35 + tl.length * 11 - 4, vis = 4, rh = 12;
+    if (this.sel < this.top) this.top = this.sel; if (this.sel >= this.top + vis) this.top = this.sel - vis + 1;
+    for (let i = 0; i < vis; i++) { const k = this.top + i, w = n.words[k]; if (!w) break;
+      const y = y0 + i * rh, on = k === this.sel;
+      if (on) R(4, y, 232, rh - 1, P.amberD);
+      R(7, y + 2, 14, 7, on ? P.amber : P.panel2); T('L' + w.l, 14, y + 8, { s: 6, f: PX, a: 'center', c: on ? P.ink : P.dim });
+      T(w.w, 25, y + 9, { s: 8.5, w: 700, f: LAT, c: on ? P.amber : P.text });
+      T(w.zh.split('；')[0], 234, y + 9, { s: 8, a: 'right', c: on ? P.text : P.dim }); }
+    // sentence panel
+    const w = n.words[this.sel], py = y0 + vis * rh + 2;
+    R(0, py, W, H - py, P.panel2);
+    T(`[${w.kk}]`, 6, py + 10, { s: 8, f: LAT, c: P.blue });
+    const lines = wrap(w.s, 228, { s: 7.5, f: LAT }); let y = py + 20;
+    for (const ln of lines.slice(0, Math.floor((H - py - 14) / 9))) { let x = 6;
+      for (const wd of ln.split(' ')) { const hit = wd.toLowerCase().replace(/[^a-z]/g, '').startsWith(w.w.slice(0, Math.max(4, w.w.length - 2)));
+        x += T(wd + ' ', x, y, { s: 7.5, f: LAT, c: hit ? P.amber : P.text, w: hit ? 700 : 400 }); } y += 9; }
+  },
+  key(k) { const n = DATA.news.words.length;
+    if (k === 'up') { this.sel = (this.sel + n - 1) % n; blip(660); } if (k === 'down') { this.sel = (this.sel + 1) % n; blip(660); }
+    if (k === 'ok') { toast('已加入單字卡'); blip(990, .06); }
+    if (k === 'back') go('home'); },
+};
+
+const defense = {
+  reset() { this.mobs = []; this.typed = ''; this.hp = 3; this.score = 0; this.spawn = 1; this.rate = 3.2; this.over = false; this.fx = []; this.time = 0; },
+  enter() { this.reset(); },
+  draw(t, dt) {
+    camp(0, 13, 240, 110, t, dt, { tentX: -6, groundH: 26 });
+    statusBar('守城打字');
+    if (!this.over) {
+      this.time += dt; this.spawn -= dt;
+      if (this.spawn <= 0) { const used = new Set(this.mobs.map(m => m.w[0]));
+        let w; for (let i = 0; i < 20; i++) { w = DATA.typing[Math.floor(Math.random() * DATA.typing.length)]; if (!used.has(w[0])) break; }
+        this.mobs.push({ w, x: 240, y: 72 + Math.floor(Math.random() * 3) * 7, v: 7 + Math.min(10, this.time / 8) + Math.random() * 3, sp: w.length > 7 ? 'ogre' : 'zombie' });
+        this.rate = Math.max(1.3, this.rate * 0.96); this.spawn = this.rate; }
+    }
+    const target = this.typed ? this.mobs.find(m => m.w.startsWith(this.typed)) : null;
+    this.mobs.sort((a, b) => a.y - b.y);
+    for (const m of [...this.mobs]) {
+      if (!this.over) m.x -= m.v * dt;
+      spr(m.sp, 8 + Math.floor(t * 6) % 4, m.x, m.y, 2, true);
+      const ww = TW(m.w, { s: 8, f: LAT, w: 700 }) + 6, lx = Math.round(m.x + 16 - ww / 2);
+      R(lx, m.y - 11, ww, 10, m === target ? P.ink : 'rgba(16,12,32,.8)');
+      if (m === target) { const a = T(this.typed, lx + 3, m.y - 3, { s: 8, f: LAT, w: 700, c: P.amber }); T(m.w.slice(this.typed.length), lx + 3 + a, m.y - 3, { s: 8, f: LAT, w: 700 }); }
+      else T(m.w, lx + 3, m.y - 3, { s: 8, f: LAT, w: 700 });
+      if (m.x < 30 && !this.over) { this.mobs.splice(this.mobs.indexOf(m), 1); this.hp--; blip(180, .2); if (this.typed && m === target) this.typed = '';
+        if (this.hp <= 0) { this.over = true; st.best = Math.max(st.best, this.score); } }
+    }
+    for (let i = this.fx.length - 1; i >= 0; i--) { const f = this.fx[i]; f.life -= dt * 2; if (f.life <= 0) { this.fx.splice(i, 1); continue; }
+      ctx.globalAlpha = f.life; T('+' + f.pts, f.x, f.y - (1 - f.life) * 14, { s: 8, f: PX, c: P.amber });
+      for (let j = 0; j < 6; j++) R(f.x + Math.cos(j) * (1 - f.life) * 14, f.y + 10 + Math.sin(j) * (1 - f.life) * 10, 2, 2, P.green); ctx.globalAlpha = 1; }
+    // HUD
+    for (let i = 0; i < 3; i++) bitmap(['.#.#.', '#####', '#####', '.###.', '..#..'], 4 + i * 7, 17, i < this.hp ? P.red : P.line);
+    T(String(this.score), 236, 22, { s: 8, f: PX, a: 'right', c: P.amber });
+    R(0, 123, W, 12, P.panel2); T('›', 5, 132, { s: 9, f: PX, c: P.amber });
+    T(this.typed + (Math.floor(t * 2) % 2 ? '_' : ''), 14, 132, { s: 8.5, f: LAT, w: 700 });
+    T('直接打字', 234, 132, { s: 7, a: 'right', c: P.dim });
+    if (this.over) { R(40, 40, 160, 52, 'rgba(16,12,32,.92)'); R(40, 40, 160, 1, P.red);
+      T('營地被攻破了', 120, 60, { s: 11, w: 700, a: 'center', c: P.red });
+      T(`${this.score} 分 · 最高 ${st.best}`, 120, 74, { s: 8, a: 'center' }); T('Enter 再來一次', 120, 86, { s: 7, a: 'center', c: P.dim }); }
+  },
+  key(k, raw) {
+    if (k === 'back') { if (!this.over) st.best = Math.max(st.best, this.score); return go('home'); }
+    if (this.over) { if (k === 'ok') this.reset(); return; }
+    if (raw === 'Backspace') { this.typed = this.typed.slice(0, -1); return; }
+    if (raw && /^[a-z]$/i.test(raw)) {
+      const nt = this.typed + raw.toLowerCase();
+      if (this.mobs.some(m => m.w.startsWith(nt))) { this.typed = nt; blip(1200, .02);
+        const m = this.mobs.find(m => m.w === nt);
+        if (m) { const pts = m.w.length * 10; this.score += pts; this.fx.push({ x: m.x + 10, y: m.y - 4, life: 1, pts }); this.mobs.splice(this.mobs.indexOf(m), 1); this.typed = ''; blip(1500, .05); }
+      } else blip(200, .03);
+    }
+  },
+};
+
+const claude = {
+  draw(t) {
+    R(0, 0, W, H, P.panel); statusBar('Claude 額度');
+    const C = st.claude;
+    C.accounts.forEach((a, i) => { const on = i === C.acct, x = 6 + i * 50, w = TW(a.name, { s: 8 }) + 12;
+      R(x, 17, w, 12, on ? P.amber : P.panel2); T(a.name, x + w / 2, 26, { s: 8, a: 'center', w: 700, c: on ? P.ink : P.dim }); });
+    T('‹ › 切換帳號', 234, 26, { s: 7, a: 'right', c: P.dim });
+    const a = C.accounts[C.acct];
+    const block = (y, label, pct, resetTxt) => {
+      T(label, 6, y, { s: 8, c: P.dim }); T(pct + '%', 234, y + 1, { s: 12, f: PX, a: 'right', c: pctColor(pct) });
+      bar(6, y + 5, 228, 7, pct / 100, pctColor(pct));
+      for (let i = 1; i < 10; i++) R(6 + Math.round(228 * i / 10), y + 5, 1, 7, 'rgba(16,12,32,.35)');
+      T(resetTxt, 6, y + 22, { s: 8 }); };
+    block(44, '5 小時', a.h5, '↻ ' + fmtDur(a.r5 - Date.now()) + ' 後重置');
+    const rw = new Date(a.rwk);
+    block(84, '每週', a.wk, `↻ 週${WEEK[rw.getDay()]} ${pad(rw.getHours())}:00 重置 · 還有 ${fmtDur(a.rwk - Date.now())}`);
+    R(0, 123, W, 12, P.panel2);
+    T(`Mac 橋接 · ${Math.round((Date.now() - C.updated) / 60000)} 分鐘前更新`, 6, 132, { s: 7, c: P.dim });
+    // tired goblin when the 5h window is nearly used up
+    if (a.h5 >= 85) { ctx.save(); ctx.translate(214, 116); ctx.rotate(-Math.PI / 2); spr('worker', 0, -8, -16, 1); ctx.restore(); T('z', 226, 106 - (t * 4 % 6), { s: 6, f: PX, c: P.blue }); }
+    else spr('worker', Math.floor(t * 2) % 2, 212, 104, 1);
+  },
+  key(k) { const C = st.claude;
+    if (k === 'left' || k === 'right') { C.acct = (C.acct + 1) % C.accounts.length; blip(740); }
+    if (k === 'ok') { C.updated = Date.now(); toast('已重新抓取'); }
+    if (k === 'back') go('home'); },
+};
+
+const BRANDS = ['日立', '大金', '國際牌', '三菱'], MODES = ['冷氣', '除濕', '送風', '暖氣', '自動'], FANS = ['自動', '低', '中', '高'];
+const TVK = [['電源', '靜音', '輸入', 'Home'], ['音量+', '▲', '頻道+', 'OK'], ['音量−', '▼', '頻道−', '返回']];
+const remote = { tab: 0, row: 0, gx: 0, gy: 0, ir: 0,
+  rows() { return ['tab', 'brand', 'power', 'temp', 'mode', 'fan', 'swing']; },
+  draw(t, dt) {
+    R(0, 0, W, H, P.panel); statusBar('遙控器');
+    ['冷氣', 'LG 電視'].forEach((s, i) => { const on = i === this.tab, x = 6 + i * 44, w = TW(s, { s: 8 }) + 12, foc = this.row === 0;
+      R(x, 17, w, 12, on ? (foc ? P.amber : P.amberD) : P.panel2); T(s, x + w / 2, 26, { s: 8, a: 'center', w: 700, c: on ? (foc ? P.ink : P.amber) : P.dim }); });
+    // IR beam
+    if (this.ir > 0) { this.ir -= dt * 2.5; ctx.globalAlpha = Math.max(0, this.ir);
+      for (let i = 0; i < 3; i++) { ctx.strokeStyle = P.pink; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(226, 23, 3 + i * 4 + (1 - this.ir) * 4, -0.9, 0.9); ctx.stroke(); }
+      ctx.globalAlpha = 1; }
+    R(222, 20, 4, 6, P.pink);
+    if (this.tab === 0) {
+      const a = st.ac;
+      // big readout
+      R(6, 34, 88, 86, P.panel2);
+      T(a.power ? a.temp + '°' : 'OFF', 50, 76, { s: a.power ? 30 : 18, f: PX, a: 'center', c: a.power ? (a.mode === 3 ? P.red : P.blue) : P.line });
+      T(a.power ? `${MODES[a.mode]} · 風 ${FANS[a.fan]}` : '已關機', 50, 96, { s: 8, a: 'center', c: P.dim });
+      T(BRANDS[st.settings.acBrand], 50, 112, { s: 7, a: 'center', c: P.dim });
+      const items = [['品牌', BRANDS[st.settings.acBrand]], ['電源', a.power ? '開' : '關'], ['溫度', a.temp + ' °C'], ['模式', MODES[a.mode]], ['風速', FANS[a.fan]], ['擺風', a.swing ? '開' : '關']];
+      items.forEach(([l, v], i) => { const y = 35 + i * 14, on = this.row === i + 1;
+        if (on) R(100, y, 136, 13, P.amberD);
+        T(l, 106, y + 9.5, { s: 8, c: on ? P.amber : P.dim });
+        T(on ? `‹ ${v} ›` : v, 230, y + 9.5, { s: 8, a: 'right', w: on ? 700 : 500, c: on ? P.text : P.text }); });
+      T('‹ › 調整，馬上送出', 230, 130, { s: 7, a: 'right', c: P.dim });
+    } else {
+      TVK.forEach((r, gy) => r.forEach((s, gx) => { const x = 8 + gx * 57, y = 38 + gy * 28, on = this.row > 0 && this.gx === gx && this.gy === gy;
+        R(x, y, 52, 22, on ? P.amber : P.panel2); if (s === '電源') R(x, y, 52, 2, P.red);
+        T(s, x + 26, y + 15, { s: 9, a: 'center', w: 700, c: on ? P.ink : P.text, f: /[A-Za-z]/.test(s) && !/[一-龥]/.test(s) ? LAT : TC }); }));
+      T('Enter 送出', 232, 130, { s: 7, a: 'right', c: P.dim });
+    }
+  },
+  send(what) { this.ir = 1; blip(1800, .03); toast(`${this.tab === 0 ? BRANDS[st.settings.acBrand] : 'LG'} · ${what}`); },
+  key(k) {
+    if (k === 'back') return go('home');
+    if (this.row === 0) { if (k === 'left' || k === 'right') { this.tab ^= 1; blip(740); } if (k === 'down' || k === 'ok') { this.row = 1; this.gx = this.gy = 0; } return; }
+    if (this.tab === 1) {
+      if (k === 'up') { if (this.gy === 0) this.row = 0; else this.gy--; }
+      if (k === 'down') this.gy = Math.min(2, this.gy + 1);
+      if (k === 'left') this.gx = Math.max(0, this.gx - 1); if (k === 'right') this.gx = Math.min(3, this.gx + 1);
+      if (k === 'ok') this.send(TVK[this.gy][this.gx]);
+      return;
+    }
+    const a = st.ac;
+    if (k === 'up') { this.row--; blip(660); return; } if (k === 'down') { this.row = Math.min(6, this.row + 1); blip(660); return; }
+    const d = k === 'right' ? 1 : k === 'left' ? -1 : 0; if (!d && k !== 'ok') return;
+    const step = d || 1;
+    switch (this.row) {
+      case 1: st.settings.acBrand = (st.settings.acBrand + step + 4) % 4; toast('品牌：' + BRANDS[st.settings.acBrand]); return;
+      case 2: a.power = !a.power; this.send(a.power ? '開機' : '關機'); return;
+      case 3: a.temp = Math.max(16, Math.min(30, a.temp + step)); break;
+      case 4: a.mode = (a.mode + step + 5) % 5; break;
+      case 5: a.fan = (a.fan + step + 4) % 4; break;
+      case 6: a.swing = !a.swing; break;
+    }
+    if (a.power) this.send(`${a.temp}° ${MODES[a.mode]} 風${FANS[a.fan]}`);
+  },
+};
+
+const clock = {
+  draw(t, dt) {
+    camp(0, 0, 240, 135, t, dt, { tentX: 88, groundH: 34, sleep: true });
+    const now = new Date();
+    ctx.globalAlpha = 0.25; R(0, 0, 240, 50, P.sky0); ctx.globalAlpha = 1;
+    T(`${pad(now.getHours())}:${pad(now.getMinutes())}`, 120, 36, { s: 30, f: PX, a: 'center', c: '#fff3d6' });
+    T(`${now.getMonth() + 1}/${now.getDate()} 週${WEEK[now.getDay()]}`, 120, 50, { s: 9, a: 'center', c: P.dim });
+    T('台北 27° 多雲', 6, 130, { s: 8, c: P.dim });
+    T('任意鍵返回', 234, 130, { s: 7, a: 'right', c: P.dim });
+  },
+  key() { go('home'); },
+};
+
+const SLEEP = ['30 秒', '1 分', '5 分', '永不'];
+const settings = { sel: 0, top: 0,
+  items() { const s = st.settings; return [
+    { l: 'Wi-Fi', v: s.wifi || '未連線', go: 'wifi' },
+    { l: '音量', bar: s.vol / 10, adj: d => { s.vol = Math.max(0, Math.min(10, s.vol + d)); blip(880); } },
+    { l: '螢幕亮度', bar: s.bright / 10, adj: d => { s.bright = Math.max(1, Math.min(10, s.bright + d)); } },
+    { l: '自動關螢幕', v: SLEEP[s.sleep], adj: d => { s.sleep = (s.sleep + d + 4) % 4; } },
+    { l: '閒置 45 秒顯示營火時鐘', v: s.idleClock ? '開' : '關', adj: () => { s.idleClock = !s.idleClock; } },
+    { l: '時區', v: 'UTC+8 台北' },
+    { l: '英文程度', v: `Lv${s.level} · 跳級測驗 ›`, adj: d => { s.level = Math.max(3, Math.min(6, s.level + d)); } },
+    { l: 'Claude 帳號', v: `${st.claude.accounts.length} 個 ›` },
+    { l: '冷氣品牌', v: BRANDS[s.acBrand], adj: d => { s.acBrand = (s.acBrand + d + 4) % 4; } },
+    { l: 'RSS 來源', v: 'NPR、BBC ›' },
+    { l: '關於', v: 'v0.1 · SD 2.1/32 GB' } ]; },
+  draw() {
+    R(0, 0, W, H, P.panel); statusBar('設定');
+    const its = this.items(), vis = 9, rh = 13;
+    if (this.sel < this.top) this.top = this.sel; if (this.sel >= this.top + vis) this.top = this.sel - vis + 1;
+    for (let i = 0; i < vis; i++) { const k = this.top + i, it = its[k]; if (!it) break; const y = 15 + i * rh, on = k === this.sel;
+      if (on) R(2, y, 234, rh - 1, P.amberD);
+      T(it.l, 8, y + 9, { s: 8, c: on ? P.amber : P.text, w: on ? 700 : 500 });
+      if (it.bar != null) { bar(150, y + 4, 60, 4, it.bar, on ? P.amber : P.dim); T(Math.round(it.bar * 10) + '', 230, y + 9, { s: 7, f: PX, a: 'right' }); }
+      else T(on && it.adj ? `‹ ${it.v} ›` : it.v, 230, y + 9, { s: 8, a: 'right', c: on ? P.text : P.dim }); }
+    const th = Math.round(117 * vis / its.length), ty = 15 + Math.round((117 - th) * this.top / (its.length - vis));
+    R(238, 15, 1, 117, P.line); R(237, ty, 3, th, P.dim);
+  },
+  key(k) { const its = this.items(), it = its[this.sel];
+    if (k === 'up') { this.sel = (this.sel + its.length - 1) % its.length; blip(660); }
+    if (k === 'down') { this.sel = (this.sel + 1) % its.length; blip(660); }
+    if ((k === 'left' || k === 'right') && it.adj) it.adj(k === 'right' ? 1 : -1);
+    if (k === 'ok') { if (it.go) go(it.go); else if (it.adj) it.adj(1); else toast('原型裡還沒做這頁'); }
+    if (k === 'back') go('home'); },
+};
+
+const wifi = { sel: 0, scan: 0, state: '', list: [['HomeNet-5G', 4, true], ['HomeNet', 3, true], ['Goblin-Camp', 3, true], ['7-ELEVEN_FREE', 2, false], ['iPhone 熱點', 2, true], ['TPE-Free', 1, false]],
+  enter() { this.scan = 1.6; this.state = ''; },
+  draw(t, dt) {
+    R(0, 0, W, H, P.panel); statusBar('Wi-Fi');
+    if (this.scan > 0) { this.scan -= dt;
+      const r = (t * 30) % 30; ctx.strokeStyle = P.blue; ctx.globalAlpha = 1 - r / 30; ctx.beginPath(); ctx.arc(120, 74, r, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
+      spr('scout', Math.floor(t * 4) % 4, 104, 58, 2); T('搜尋中…', 120, 110, { s: 9, a: 'center', c: P.dim }); return; }
+    this.list.forEach(([n, sig, lock], i) => { const y = 16 + i * 15, on = i === this.sel, cur = n === st.settings.wifi;
+      if (on) R(2, y, 236, 14, P.amberD);
+      for (let b = 0; b < 4; b++) R(8 + b * 3, y + 10 - b * 2, 2, 2 + b * 2, b < sig ? (on ? P.amber : P.text) : P.line);
+      T(n, 26, y + 10, { s: 8, w: cur ? 700 : 500, c: on ? P.amber : P.text, f: /[一-龥]/.test(n) ? TC : LAT });
+      if (lock) bitmap(['.##.', '#..#', '####', '####'], 196, y + 5, P.dim);
+      if (cur) T(this.state || '已連線', 232, y + 10, { s: 7, a: 'right', c: P.green }); });
+    T('Enter 連線 · ` 返回', 232, 131, { s: 7, a: 'right', c: P.dim });
+  },
+  key(k) { if (this.scan > 0) return;
+    if (k === 'up') this.sel = (this.sel + this.list.length - 1) % this.list.length;
+    if (k === 'down') this.sel = (this.sel + 1) % this.list.length;
+    if (k === 'ok') { st.settings.wifi = this.list[this.sel][0]; this.state = '連線中…'; setTimeout(() => { this.state = ''; toast('已連上 ' + st.settings.wifi); }, 1200); }
+    if (k === 'back') go('settings'); },
+};
+
+const SCREENS = { home, vocab, news, defense, claude, remote, clock, settings, wifi };
+const LABEL = { home: '主選單', vocab: '英語單字', news: '今日新聞', defense: '守城打字', claude: 'Claude 額度', remote: '遙控器', clock: '營火時鐘', settings: '設定' };
+let cur = 'home', lastKey = performance.now();
+function go(id) { cur = id; SCREENS[id].enter?.(); syncJump(); }
+
+// ---------- input ----------
+const MAP = { ';': 'up', ArrowUp: 'up', '.': 'down', ArrowDown: 'down', ',': 'left', ArrowLeft: 'left', '/': 'right', ArrowRight: 'right',
+  Enter: 'ok', ' ': 'space', '`': 'back', Escape: 'back', '1': '1', '2': '2', '3': '3' };
+function press(k, raw) {
+  lastKey = performance.now();
+  if (cur === 'clock' && k !== 'none') { go('home'); return; }
+  SCREENS[cur].key(k, raw);
+}
+window.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.closest && e.target.closest('button') && (e.key === 'Enter' || e.key === ' ')) return;
+  if (cur === 'defense') {
+    if (/^[a-z]$/i.test(e.key) || e.key === 'Backspace') { e.preventDefault(); press('type', e.key); return; }
+    if (e.key === '`' || e.key === 'Escape') { e.preventDefault(); press('back'); return; }
+    if (e.key === 'Enter') { e.preventDefault(); press('ok'); return; }
+    return;
+  }
+  const k = MAP[e.key] || (e.key === 'Backspace' ? 'back' : null);
+  if (!k) return; e.preventDefault(); press(k, e.key);
+});
+document.getElementById('keys').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { press(b.dataset.k); cv.focus({ preventScroll: true }); } });
+cv.addEventListener('pointerdown', () => cv.focus({ preventScroll: true }));
+
+const jump = document.getElementById('jump');
+for (const id in LABEL) { const b = document.createElement('button'); b.textContent = LABEL[id]; b.dataset.id = id; b.id = 'jump-' + id;
+  b.addEventListener('click', () => { go(id); if (id !== 'home') home.sel = Math.max(0, MENU.findIndex(m => m.id === id)); cv.focus({ preventScroll: true }); }); jump.appendChild(b); }
+function syncJump() { for (const b of jump.children) b.setAttribute('aria-current', String(b.dataset.id === cur || (cur === 'wifi' && b.dataset.id === 'settings'))); }
+syncJump();
+
+// ---------- loop ----------
+let last = performance.now();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now; const t = reduce ? 0 : now / 1000;
+  // idle → campfire clock
+  // idle clock kicks in after 45 s on the home screen; screen-off timing is separate (not simulated here)
+  if (cur === 'home' && st.settings.idleClock && now - lastKey > 45000) go('clock');
+  ctx.clearRect(0, 0, W, H);
+  SCREENS[cur].draw(t, reduce ? 0 : dt);
+  if (st.toast) { const age = (now - st.toast.t) / 1000;
+    if (age > 1.8) st.toast = null; else { const w = TW(st.toast.msg, { s: 8 }) + 14, y = 112 - Math.min(1, age * 8) * 4;
+      ctx.globalAlpha = Math.min(1, (1.8 - age) * 4); R(120 - w / 2, y, w, 13, P.ink); R(120 - w / 2, y, 2, 13, P.amber);
+      T(st.toast.msg, 120, y + 9.5, { s: 8, a: 'center' }); ctx.globalAlpha = 1; } }
+  requestAnimationFrame(frame);
+}
+(document.fonts ? Promise.race([Promise.all(['500 9px "Noto Sans TC"', '700 9px "Noto Sans"', '9px "Silkscreen"'].map(f => document.fonts.load(f, '營地Aa'))), new Promise(r => setTimeout(r, 1500))]) : Promise.resolve())
+  .finally(() => requestAnimationFrame(frame));
+</script>
