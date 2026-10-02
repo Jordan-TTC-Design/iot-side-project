@@ -1,8 +1,9 @@
 // 哥布林合唱團：7 個角色各唱一個音。三種模式（Tab 切換）：
 //   唱名：機器上合成，每個角色音色不同（啊、喔、咿…）唱 Do Re Mi Fa Sol La Si
-//   錄音：r 再按角色鍵，倒數後錄 1.5 秒，存在 SD 卡 /goblin/choir/rec/N.raw
+//   錄音：Enter 再按任一個琴鍵，倒數後錄那個角色 1.5 秒，存在 SD 卡 /goblin/choir/rec/N.raw
 //   自訂：SD 卡 /goblin/choir/custom/N.wav（16kHz 單聲道 16-bit，用 tools/choir_put.py 轉檔上傳）
-// 鍵盤當鋼琴：a s d f g h j = Do～Si，k l ; 上一個八度，w e t y u o p 黑鍵，z x 降／升八度，1–7 直接叫角色
+// 鍵盤當鋼琴：四排鍵＝四個八度（z 排最低、a 排中音、q 排高音、數字排最高），每排從左邊 Do 開始，
+// 往右超過 Si 就接著上一個八度；按住 Shift 升半音。誰唱照音名決定（所有的 Do 都是平民唱）
 // 錄音和自訂音檔會依音高自動變調（改變播放速度），一段聲音就能彈整個音階。最多 4 個音同時發聲
 #pragma once
 #include <functional>
@@ -196,7 +197,7 @@ struct Choir {
 } choir;
 
 struct ChoirApp : App {
-  int mode = 0, octave = 0;
+  int mode = 0;
   bool armRec = false;
   float hop[7] = {0};
   bool has[2][7];   // 錄音／自訂音檔是否存在
@@ -253,25 +254,33 @@ struct ChoirApp : App {
       text(names[i], x + w / 2, 26, i == mode ? P::ink : P::dim, F_BODY, CENTER);
       x += w + 3;
     }
-    text("八度 " + String(octave > 0 ? "+" : "") + octave, 234, 26, P::dim, F_SMALL, RIGHT);
     R(0, 122, W, 13, P::panel2);
-    const char* hint = armRec ? "按角色鍵（1–7 或 a–j）開始錄音" :
-                       mode == 0 ? "a–j 彈琴 · z x 八度 · Tab 換模式" :
-                       mode == 1 ? "r 再按角色錄音 · 綠色＝已錄" :
+    const char* hint = armRec ? "按任一個琴鍵，錄那個角色" :
+                       mode == 0 ? "四排鍵＝四個八度 · Shift 升半音" :
+                       mode == 1 ? "Enter 再按琴鍵錄音 · 綠色＝已錄" :
                                    "放 /goblin/choir/custom/1–7.wav";
     text(hint, 6, 132, armRec ? P::red : P::dim);
   }
 
-  // 鍵 → 角色（0–6）與相對半音；回傳 false 代表不是琴鍵
+  // 鍵 → 角色（0–6）與相對於中音那個八度差幾個半音；回傳 false 代表不是琴鍵
   bool keyNote(char c, int& who, int& semis) {
-    const char* white = "asdfghjkl;";
-    const char* p = strchr(white, c);
-    if (c >= '1' && c <= '7') { who = c - '1'; semis = 12 * octave; return true; }
-    if (p && *p) { int d = p - white; who = d % 7; semis = 12 * (octave + d / 7); return true; }
-    // 黑鍵：用左邊那個白鍵的角色，升半音
-    const char* black = "we.tyu.op";
-    const char* q = strchr(black, c);
-    if (q && *q && *q != '.') { int d = q - black; who = d % 7; semis = 12 * (octave + d / 7) + 1; return true; }
+    struct Row { const char* keys; const char* shifted; int octave; };
+    static const Row rows[4] = {
+        {"zxcvbnm,./", "ZXCVBNM<>?", -1},
+        {"asdfghjkl;'", "ASDFGHJKL:\"", 0},
+        {"qwertyuiop[]\\", "QWERTYUIOP{}|", 1},
+        {"1234567890-=", "!@#$%^&*()_+", 2},
+    };
+    for (auto& r : rows) {
+      const char* p = strchr(r.keys, c);
+      bool sharp = false;
+      if (!p || !*p) { p = strchr(r.shifted, c); sharp = p && *p; if (sharp) p = r.keys + (p - r.shifted); }
+      if (!p || !*p) continue;
+      int d = p - r.keys;
+      who = d % 7;
+      semis = 12 * (r.octave + d / 7) + (sharp ? 1 : 0);
+      return true;
+    }
     return false;
   }
 
@@ -298,13 +307,10 @@ struct ChoirApp : App {
   void key(const KeyEv& e) override {
     if (e.k == K_BACK) { go(A_HOME); return; }
     if (e.k == K_TAB) { mode = (mode + 1) % 3; armRec = false; scan(); blip(740); return; }
+    if (e.k == K_OK && mode == 1) { armRec = !armRec; return; }
     if (e.k != K_CHAR) return;
-    char c = tolower(e.c);
-    if (c == 'z') { octave = max(-2, octave - 1); return; }
-    if (c == 'x') { octave = min(2, octave + 1); return; }
-    if (c == 'r' && mode == 1) { armRec = !armRec; return; }
     int who, semis;
-    if (!keyNote(c, who, semis)) return;
+    if (!keyNote(e.c, who, semis)) return;
     if (armRec) { doRecord(who); return; }
     if (mode > 0 && !has[mode - 1][who]) {
       toast(mode == 1 ? String(SINGERS[who].name) + " 還沒錄音：按 r 再按這個鍵" : String(who + 1) + ".wav 還沒放");
