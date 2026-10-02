@@ -60,6 +60,8 @@ Cardputer ADV 的主介面：開機看到哥布林營地，左邊營地、右邊
 - **正在播放（Spotify）**：橋接程式用 AppleScript 讀寫 Mac 上的 Spotify App（不用 API 金鑰、不用 Premium）。`/np.txt` 歌名歌手進度、`/np/art` 封面縮成 32×32、16 色；機器上像素唱片機，封面當唱片標籤，‹ › 上下首、Enter 暫停、; . 音量。只抓得到這台 Mac 上播的
 - **橋接程式常駐**：`./tools/install_bridge.sh`（launchd `cc.goblin.bridge`，log 在 `~/Library/Logs/goblin-bridge.log`）；改了 bridge.py 再跑一次就會重新載入
 - **Claude 額度已接上**：2026-10-02 改了 `~/.claude/settings.json` 的 statusLine（前面加 goblin_statusline.py，ccstatusline 照舊）。另一個帳號如果有自己的 `CLAUDE_CONFIG_DIR`，那邊的 settings.json 也要改同一行
+- **營火白噪音**：機器上即時合成（布朗噪音＋隨機劈啪），不用音檔；營火時鐘按 f 開關、[ ] 大小聲，劈啪時營火噴火星；關螢幕也繼續播
+- **真實天氣**：Open-Meteo（免費、不用金鑰，機器直接抓），每 15 分鐘。營地跟著變：照日出日落分白天黃昏晚上、雲、雨（依雨量）、雪、霧、雷雨閃光；<15°C 發抖、>30°C 冒汗。城市在設定裡選。除錯：序列埠 `WX <代碼> <溫度> <白天>`、`WX off`
 - **發音**：Mac 上用 `say -v Samantha` 預錄單字和例句，放在 SD 卡
 - **複習**：Leitner 卡片盒間隔複習，進度存在 SD 卡
 - **跳級測驗**：每一級抽題測驗，通過才解鎖下一級
@@ -163,3 +165,4 @@ python3 tools/sd_put.py sd/goblin/vocab.tsv   # 透過 USB 寫進 SD 卡，不�
 - **2026-10-02（晚上）**：遙控器、營火時鐘常亮、守城字牌分軌、Mac 橋接、Claude 額度、新聞 app（編譯通過，等實機測試）
 - **2026-10-02（晚上）**：實機驗證遙控器版面、新聞、Claude 額度（mDNS 找到橋接程式）、發音（下載、存 SD、串流播放）
 - **2026-10-02（晚上）**：Spotify 正在播放、橋接程式 launchd 常駐、Claude 額度接上真的資料
+- **2026-10-02（晚上）**：營火白噪音、真實天氣場景（7 種天氣實機截圖驗證）

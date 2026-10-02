@@ -8,6 +8,8 @@ struct Settings {
   uint8_t sleep = 1;      // 自動關螢幕：0=30 秒 1=1 分 2=5 分 3=永不
   bool idleClock = true;  // 主選單閒置 45 秒切到營火時鐘
   bool clockAwake = false; // 營火時鐘畫面不自動關螢幕（在時鐘按 Space 切換）
+  uint8_t fireVol = 6;     // 營火聲大小 1–10（在時鐘按 [ ] 調）
+  uint8_t city = 0;        // 天氣用哪個城市（weather.h 的 CITIES）
   uint8_t level = 3;      // 目前背的級數（3–6）
   uint8_t unlocked = 3;   // 已解鎖到第幾級；往上要通過跳級測驗
   uint8_t acBrand = 1;    // 冷氣品牌：0 日立 1 大金 2 國際牌 3 三菱
@@ -27,6 +29,8 @@ void loadSettings() {
   cfg.sleep = prefs.getUChar("sleep", cfg.sleep);
   cfg.idleClock = prefs.getBool("idleClock", cfg.idleClock);
   cfg.clockAwake = prefs.getBool("clockAwake", cfg.clockAwake);
+  cfg.fireVol = prefs.getUChar("fireVol", cfg.fireVol);
+  cfg.city = prefs.getUChar("city", cfg.city);
   cfg.level = prefs.getUChar("level", cfg.level);
   cfg.unlocked = prefs.getUChar("unlocked", cfg.unlocked);
   cfg.acBrand = prefs.getUChar("acBrand", cfg.acBrand);
@@ -45,6 +49,8 @@ void saveSettings() {
   prefs.putUChar("sleep", cfg.sleep);
   prefs.putBool("idleClock", cfg.idleClock);
   prefs.putBool("clockAwake", cfg.clockAwake);
+  prefs.putUChar("fireVol", cfg.fireVol);
+  prefs.putUChar("city", cfg.city);
   prefs.putUChar("level", cfg.level);
   prefs.putUChar("unlocked", cfg.unlocked);
   prefs.putUChar("acBrand", cfg.acBrand);

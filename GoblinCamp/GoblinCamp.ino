@@ -11,9 +11,11 @@
 #include "ui.h"
 #include "input.h"
 #include "store.h"
-#include "camp.h"
+#include "fire_sound.h"
 #include "net.h"
 #include "audio.h"
+#include "weather.h"
+#include "camp.h"
 #include "app.h"
 #include "app_home.h"
 #include "app_vocab.h"
@@ -68,6 +70,8 @@ void loop() {
   serialTick();
   usage.tick();
   speech.tick();
+  fireSound.tick();   // 關螢幕時營火聲也繼續
+  weather.tick();
   pollKeys(cur->textMode());
 
   // 關螢幕時，第一個按鍵只負責叫醒

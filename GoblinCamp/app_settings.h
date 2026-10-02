@@ -5,12 +5,12 @@ const char* const SLEEP_LABEL[4] = {"30 秒", "1 分", "5 分", "永不"};
 const char* const BRANDS[4] = {"日立", "大金", "國際牌", "三菱"};
 
 struct SettingsApp : App {
-  enum Item : uint8_t { S_WIFI, S_VOL, S_BRIGHT, S_SLEEP, S_IDLE, S_LEVEL, S_AC, S_SD, S_ABOUT, S_N };
+  enum Item : uint8_t { S_WIFI, S_VOL, S_BRIGHT, S_SLEEP, S_IDLE, S_CITY, S_LEVEL, S_AC, S_SD, S_ABOUT, S_N };
   int sel = 0, top = 0;
 
   const char* label(int i) {
     static const char* const L[S_N] = {"Wi-Fi", "音量", "螢幕亮度", "自動關螢幕", "閒置 45 秒顯示營火時鐘",
-                                       "英文程度", "冷氣品牌", "SD 卡", "關於"};
+                                       "天氣城市", "英文程度", "冷氣品牌", "SD 卡", "關於"};
     return L[i];
   }
   String value(int i) {
@@ -18,6 +18,7 @@ struct SettingsApp : App {
       case S_WIFI: return WiFi.status() == WL_CONNECTED ? WiFi.SSID() : cfg.ssid.length() ? cfg.ssid + "（未連上）" : String("未設定 ›");
       case S_SLEEP: return SLEEP_LABEL[cfg.sleep];
       case S_IDLE: return cfg.idleClock ? "開" : "關";
+      case S_CITY: return weather.ok ? weather.line() : String(CITIES[cfg.city % CITY_N].name);
       case S_LEVEL: return "Lv" + String(cfg.level) + "（解鎖到 " + cfg.unlocked + "）";
       case S_AC: return BRANDS[cfg.acBrand];
       case S_SD: return !sdOk ? String("沒有讀到") : vocab.ok ? String(vocab.count) + " 字" : String("缺單字檔");
@@ -25,13 +26,14 @@ struct SettingsApp : App {
       default: return "";
     }
   }
-  bool adjustable(int i) { return i == S_VOL || i == S_BRIGHT || i == S_SLEEP || i == S_IDLE || i == S_LEVEL || i == S_AC; }
+  bool adjustable(int i) { return i == S_VOL || i == S_BRIGHT || i == S_SLEEP || i == S_IDLE || i == S_CITY || i == S_LEVEL || i == S_AC; }
   void adjust(int i, int d) {
     switch (i) {
       case S_VOL: cfg.vol = constrain(cfg.vol + d, 0, 10); applySettings(); blip(880); break;
       case S_BRIGHT: cfg.bright = constrain(cfg.bright + d, 1, 10); applySettings(); break;
       case S_SLEEP: cfg.sleep = (cfg.sleep + d + 4) % 4; break;
       case S_IDLE: cfg.idleClock = !cfg.idleClock; break;
+      case S_CITY: cfg.city = (cfg.city + d + CITY_N) % CITY_N; weather.ok = false; weather.lastTry = 0; break;
       case S_LEVEL: {
         int lv = cfg.level + d;
         if (lv > cfg.unlocked) { toast("第 " + String(lv) + " 級要先解鎖"); return; }

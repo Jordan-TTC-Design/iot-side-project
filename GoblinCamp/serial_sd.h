@@ -68,6 +68,15 @@ void serialTick() {
       int id = line.substring(3).toInt();
       if (id >= 0 && id < A_COUNT) { lastInput = millis(); go((AppId)id); }
       Serial.println("OK");
+    } else if (line.startsWith("WX")) {   // WX <天氣代碼> <溫度> <白天 0/1>；WX off 恢復真實天氣
+      if (line == "WX off") { weather.forced = false; weather.lastTry = 0; }
+      else {
+        int a = line.indexOf(' ', 3), b = line.indexOf(' ', a + 1);
+        weather.code = line.substring(3, a).toInt(); weather.temp = line.substring(a + 1, b).toFloat();
+        weather.isDay = line.substring(b + 1).toInt(); weather.sunrise = weather.sunset = 0;
+        weather.ok = weather.forced = true;
+      }
+      Serial.println("OK");
     } else if (line.startsWith("LS")) {
       String dir = line.length() > 3 ? line.substring(3) : String("/");
       File d = SD.open(dir);

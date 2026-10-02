@@ -58,18 +58,35 @@ struct ClockApp : App {
     drawCamp(0, 0, 240, 135, t, dt, o);
     tm tt;
     bool ok = timeOk(tt);
-    text(ok ? two(tt.tm_hour) + ":" + two(tt.tm_min) : String("--:--"), 120, 42, rgb(0xfff3d6), F_CLOCK, CENTER);
-    if (ok) text(String(tt.tm_mon + 1) + "/" + tt.tm_mday + " 週" + WEEK[tt.tm_wday], 120, 58, P::dim, F_BODY, CENTER);
-    else text("連上 Wi-Fi 才會對時", 120, 58, P::dim, F_BODY, CENTER);
+    // 字加深色陰影，白天天空變亮也看得清楚
+    auto shadowText = [](const String& s, int x, int y, uint16_t c, F f) {
+      text(s, x + 1, y + 1, P::ink, f, CENTER); text(s, x, y, c, f, CENTER);
+    };
+    shadowText(ok ? two(tt.tm_hour) + ":" + two(tt.tm_min) : String("--:--"), 120, 42, rgb(0xfff3d6), F_CLOCK);
+    shadowText(ok ? String(tt.tm_mon + 1) + "/" + tt.tm_mday + " 週" + WEEK[tt.tm_wday] : String("連上 Wi-Fi 才會對時"), 120, 58, rgb(0xe8e0f4), F_BODY);
     // 常亮開關：右上角小太陽
     if (cfg.clockAwake) {
       cv.fillCircle(8, 9, 3, P::amber);
       for (int i = 0; i < 8; i++) { float a = i * 0.785f; cv.drawPixel(8 + (int)(cosf(a) * 5.5f), 9 + (int)(sinf(a) * 5.5f), P::amber); }
       text("常亮", 16, 13, P::amber, F_SMALL);
     }
-    text(cfg.clockAwake ? "Space 恢復自動關螢幕" : "Space 不關螢幕 · 其他鍵返回", 234, 130, P::dim, F_BODY, RIGHT);
+    // 營火聲
+    if (fireSound.on) {
+      bitmap(IC_FIRE, 10, 3, 18, P::amber);
+      for (int i = 0; i < 10; i++) R(16 + i * 3, 25, 2, 2, i < cfg.fireVol ? P::amber : P::line);
+    }
+    if (weather.ok) { text(weather.line(), 7, 131, P::ink); text(weather.line(), 6, 130, P::text); }
+    text(fireSound.on ? "f 關營火聲  [ ] 大小聲" : "f 營火聲 Space 常亮", 234, 130, P::dim, F_SMALL, RIGHT);
   }
   void key(const KeyEv& e) override {
+    if (e.k == K_CHAR && (e.c == 'f' || e.c == 'F')) {
+      fireSound.toggle(); toast(fireSound.on ? "營火聲開" : "營火聲關");
+      if (fireSound.on && !cfg.vol) toast("音量是 0，到設定調大");
+      return;
+    }
+    if (fireSound.on && e.k == K_CHAR && (e.c == '[' || e.c == ']')) {   // [ 小聲、] 大聲
+      cfg.fireVol = constrain(cfg.fireVol + (e.c == ']' ? 1 : -1), 1, 10); saveSettings(); return;
+    }
     if (e.k == K_SPACE) {
       cfg.clockAwake = !cfg.clockAwake; saveSettings(); blip(cfg.clockAwake ? 1180 : 660, 40);
       toast(cfg.clockAwake ? "營火時鐘不關螢幕" : "恢復自動關螢幕");
