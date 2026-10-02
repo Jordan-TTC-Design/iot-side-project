@@ -16,7 +16,7 @@ def main():
     _, fd = open_port()
     time.sleep(0.3); termios.tcflush(fd, termios.TCIFLUSH)
     for k in keys:
-        cmd = f'GO {k[3:]}' if k.startswith('go:') else k.replace(':', ' ') if k.startswith('WX') else f'KEY {k}'   # go:5 跳到 AppId 5；WX:61:12:0 指定天氣
+        cmd = f'GO {k[3:]}' if k.startswith('go:') else k.replace(':', ' ') if k.startswith(('WX', 'PLAY')) else f'KEY {k}'   # go:5 跳到 AppId 5；WX:61:12:0 指定天氣
         os.write(fd, f'{cmd}\n'.encode()); expect(fd, 'OK'); time.sleep(0.3)
     time.sleep(0.2)
     os.write(fd, b'SHOT\n')

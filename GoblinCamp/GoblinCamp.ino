@@ -25,6 +25,8 @@
 #include "app_claude.h"
 #include "app_news.h"
 #include "app_music.h"
+#include "choir.h"
+#include "rhythm.h"
 #include "app_choir.h"
 #include "serial_sd.h"
 

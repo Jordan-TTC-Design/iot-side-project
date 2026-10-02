@@ -77,6 +77,11 @@ void serialTick() {
         weather.ok = weather.forced = true;
       }
       Serial.println("OK");
+    } else if (line.startsWith("PLAY ")) {   // PLAY <第幾首> <1=示範>：直接開始音樂遊戲，測試用
+      int a = line.indexOf(' ', 5);
+      go(A_CHOIR); choirApp.mode = 3; rhythm.sel = line.substring(5, a < 0 ? line.length() : a).toInt();
+      rhythm.start(rhythm.sel, a > 0 && line.substring(a + 1).toInt());
+      lastInput = millis(); Serial.println("OK");
     } else if (line.startsWith("LS")) {
       String dir = line.length() > 3 ? line.substring(3) : String("/");
       File d = SD.open(dir);
