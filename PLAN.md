@@ -119,6 +119,12 @@ Cardputer ADV 的主介面：開機看到哥布林營地，左邊營地、右邊
 ---
 
 ## 之後可以考慮
+- **怎麼認得「我的電腦」、換電腦**（2026-10-02 提出，還在想）
+  - 現況：Cardputer 用 Bonjour 找 `_goblin._tcp`，**連第一個回應的**，沒有驗證。同網路上別人也跑橋接程式、或自己有兩台都裝，會分不出來；同網路的任何裝置也能讀額度、切歌
+  - 換電腦：每台電腦都要裝橋接程式（clone repo、`install_bridge.sh`、改狀態列），Cardputer 顯示的是「目前連到那台」的 Claude 帳號和 Spotify
+  - 方案 A：每台電腦一組配對碼，Cardputer 記住多台、只連配對過的，狀態列顯示目前連哪台
+  - 方案 B：設定裡列出網路上找到的所有橋接程式，像選 Wi-Fi 一樣挑一台（最簡單，但沒有安全性）
+  - 方案 C：每台 Mac 把資料推到雲端（哥布林營地的 server），Cardputer 綁「帳號」而不是綁電腦，只配對一次；在哪台電腦用都會出現，出門在外也看得到。Spotify 控制透過 server 轉給正在播的那台 Mac
 - 對講機模式問 Claude：麥克風錄音 → Mac 用 Whisper 轉文字 → Claude → 答案顯示在螢幕上
 - 發音練習：念一個單字，用 Whisper 辨識，判斷念得對不對
 - Claude Code 的允許／拒絕按鈕：接哥布林營地 server 的 `/claude/asks`、`/answer`
