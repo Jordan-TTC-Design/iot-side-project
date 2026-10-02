@@ -49,7 +49,14 @@ void statusBar(const char* title = nullptr) {
   } else {
     text(hhmm(), 4, 10, P::text, F_BODYB);
     tm t;
-    if (timeOk(t)) text(String(t.tm_mon + 1) + "/" + t.tm_mday + " 週" + WEEK[t.tm_wday], 44, 10, P::dim);
+    if (auto* a = usage.cur()) {   // 有 Claude 額度就顯示 5 小時用量，沒有就顯示日期
+      uint16_t c = a->h5 >= 85 ? P::red : a->h5 >= 60 ? P::amber : P::green;
+      text("5h", 46, 10, P::dim, F_SMALL);
+      bar(60, 4, 26, 5, a->h5 / 100.f, c);
+      text(String(a->h5) + "%", 90, 10, P::text, F_SMALL);
+      int32_t left = (int32_t)(a->r5 - usage.now());
+      if (left > 0) { bitmap(IC_CLOCK, 7, 116, 3, P::dim); text(String(left / 3600) + ":" + two(left % 3600 / 60), 125, 10, P::dim, F_SMALL); }
+    } else if (timeOk(t)) text(String(t.tm_mon + 1) + "/" + t.tm_mday + " 週" + WEEK[t.tm_wday], 44, 10, P::dim);
   }
   // Wi-Fi 訊號
   int bars = 0;

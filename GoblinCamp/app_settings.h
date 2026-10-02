@@ -38,7 +38,7 @@ struct SettingsApp : App {
         if (lv >= 3 && lv <= 6) { vocab.save(); cfg.level = lv; }
         break;
       }
-      case S_AC: cfg.acBrand = (cfg.acBrand + d + 4) % 4; break;
+      case S_AC: cfg.acBrand = (cfg.acBrand + d + 4) % 4; cfg.acModel = 0; break;
     }
     saveSettings();
   }

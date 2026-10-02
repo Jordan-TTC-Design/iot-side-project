@@ -1,4 +1,4 @@
-// 英語單字：單字卡＋Leitner 卡片盒。1 不會、2 模糊、3 會了；Space 翻面
+// 英語單字：單字卡＋Leitner 卡片盒。1 不會、2 模糊、3 會了；Space 翻面；Enter 念單字、Tab 念句子
 #pragma once
 
 struct VocabApp : App {
@@ -101,10 +101,12 @@ struct VocabApp : App {
     const char* lab[3] = {"不會", "模糊", "會了"};
     uint16_t col[3] = {P::red, P::amber, P::green};
     for (int i = 0; i < 3; i++) {
-      int x = 8 + i * 58;
+      int x = 6 + i * 46;
       R(x, 125, 9, 8, col[i]); text(String(i + 1), x + 5, 132, P::ink, F_SMALL, CENTER);
-      text(lab[i], x + 12, 133, P::text);
+      text(lab[i], x + 11, 133, P::text);
     }
+    bool talking = speech.playing();
+    text(talking ? "念…" : "Enter 念字 Tab 念句", 236, 132, talking ? P::amber : P::dim, F_SMALL, RIGHT);
   }
 
   void key(const KeyEv& e) override {
@@ -115,7 +117,9 @@ struct VocabApp : App {
       if (e.k == K_LEFT || e.k == K_RIGHT) changeLevel(e.k == K_RIGHT ? 1 : -1);
       return;
     }
-    if (e.k == K_SPACE || e.k == K_OK) { flip = !flip; blip(740); }
+    if (e.k == K_SPACE) { flip = !flip; blip(740); }
+    if (e.k == K_OK) { current(); sayWord(q[0], w.w.substring(0, w.w.indexOf('/') < 0 ? w.w.length() : w.w.indexOf('/'))); }
+    if (e.k == K_TAB) { current(); if (w.ex.length()) { flip = true; saySentence(q[0], w.ex); } }
     if (e.k == K_CHAR && e.c >= '1' && e.c <= '3') {
       if (!flip) { flip = true; return; }
       rate(e.c - '0');

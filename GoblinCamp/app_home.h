@@ -1,4 +1,4 @@
-// 主選單、營火時鐘、還沒做的 app 的占位頁
+// 主選單、營火時鐘
 #pragma once
 
 struct MenuItem { const char* label; const char* const* icon; uint16_t color; AppId id; };
@@ -15,7 +15,9 @@ String menuValue(AppId id) {
   switch (id) {
     case A_VOCAB: return vocab.ok ? "Lv" + String(cfg.level) + " · " + String(vocab.mastered(cfg.level) * 100 / max(1, vocab.size(cfg.level))) + "%" : String("沒有 SD");
     case A_DEFENSE: return bestScore ? String(bestScore) : String("");
-    case A_WIFI: return "";
+    case A_CLAUDE: return usage.cur() ? String(usage.cur()->h5) + "%" : String("");
+    case A_NEWS: return "";
+    case A_REMOTE: return cfg.acPower ? "冷氣 " + String(cfg.acTemp) + "°" : String("");
     default: return "";
   }
 }
@@ -59,28 +61,20 @@ struct ClockApp : App {
     text(ok ? two(tt.tm_hour) + ":" + two(tt.tm_min) : String("--:--"), 120, 42, rgb(0xfff3d6), F_CLOCK, CENTER);
     if (ok) text(String(tt.tm_mon + 1) + "/" + tt.tm_mday + " 週" + WEEK[tt.tm_wday], 120, 58, P::dim, F_BODY, CENTER);
     else text("連上 Wi-Fi 才會對時", 120, 58, P::dim, F_BODY, CENTER);
-    text("任意鍵返回", 234, 130, P::dim, F_BODY, RIGHT);
+    // 常亮開關：右上角小太陽
+    if (cfg.clockAwake) {
+      cv.fillCircle(8, 9, 3, P::amber);
+      for (int i = 0; i < 8; i++) { float a = i * 0.785f; cv.drawPixel(8 + (int)(cosf(a) * 5.5f), 9 + (int)(sinf(a) * 5.5f), P::amber); }
+      text("常亮", 16, 13, P::amber, F_SMALL);
+    }
+    text(cfg.clockAwake ? "Space 恢復自動關螢幕" : "Space 不關螢幕 · 其他鍵返回", 234, 130, P::dim, F_BODY, RIGHT);
   }
-  void key(const KeyEv&) override { go(A_HOME); }
+  void key(const KeyEv& e) override {
+    if (e.k == K_SPACE) {
+      cfg.clockAwake = !cfg.clockAwake; saveSettings(); blip(cfg.clockAwake ? 1180 : 660, 40);
+      toast(cfg.clockAwake ? "營火時鐘不關螢幕" : "恢復自動關螢幕");
+      return;
+    }
+    go(A_HOME);
+  }
 } clockApp;
-
-// 還沒做的 app：哥布林舉牌子說明之後會有什麼
-struct StubApp : App {
-  const char* title; const char* line1; const char* line2;
-  StubApp(const char* t, const char* a, const char* b) : title(t), line1(a), line2(b) {}
-  void draw(float t, float) override {
-    R(0, 0, W, H, P::panel);
-    statusBar(title);
-    int bob = (int)(sinf(t * 3) * 2);
-    sprite(S_WORKER, ((int)(t * 2)) % 2, 20, 58 + bob, 3);
-    R(76, 40, 154, 54, P::panel2); R(76, 40, 154, 1, P::amber);
-    text("還在蓋", 84, 58, P::amber);
-    text(line1, 84, 74, P::text);
-    text(line2, 84, 88, P::dim);
-    text("` 返回", 234, 130, P::dim, F_BODY, RIGHT);
-  }
-  void key(const KeyEv& e) override { if (e.k == K_BACK || e.k == K_OK) go(A_HOME); }
-};
-StubApp newsApp("今日新聞", "NPR、BBC 每天挑字", "Mac 產生新聞包放 SD 卡");
-StubApp claudeApp("Claude 額度", "5 小時、每週用量", "需要 Mac 上的橋接程式");
-StubApp remoteApp("遙控器", "冷氣四個品牌、LG 電視", "下一步就做");

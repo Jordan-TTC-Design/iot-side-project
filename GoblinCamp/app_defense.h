@@ -2,7 +2,9 @@
 #pragma once
 
 struct DefenseApp : App {
-  struct Mob { char w[16]; float x, v; int y; bool big; bool alive; };
+  // 字牌分 4 條軌道畫在不同高度，避免互相蓋住；所有怪物同速，不會超車
+  static constexpr int LANES = 4;
+  struct Mob { char w[16]; float x; int lane, labelW; bool big; bool alive; };
   Mob mobs[8];
   char typed[16];
   int hp, score;
@@ -38,6 +40,18 @@ struct DefenseApp : App {
   }
   void enter() override { fillPool(); reset(); }
 
+  int mobY(const Mob& m) { return 60 + m.lane * 4; }
+  // 回傳一條可以放新怪物的軌道：那條軌道最右邊的怪物已經離開入口夠遠
+  int freeLane() {
+    int start = random(LANES);
+    for (int k = 0; k < LANES; k++) {
+      int l = (start + k) % LANES;
+      bool ok = true;
+      for (auto& m : mobs) if (m.alive && m.lane == l && m.x + m.labelW / 2 > 190) ok = false;   // 最長的字牌約 80px
+      if (ok) return l;
+    }
+    return -1;
+  }
   Mob* target() {
     if (!typed[0]) return nullptr;
     for (auto& m : mobs) if (m.alive && !strncmp(m.w, typed, strlen(typed))) return &m;
@@ -50,7 +64,8 @@ struct DefenseApp : App {
     statusBar("守城打字");
     if (!over) {
       elapsed += dt; spawn -= dt;
-      if (spawn <= 0) {
+      int lane = freeLane();
+      if (spawn <= 0 && lane >= 0) {
         for (auto& m : mobs) if (!m.alive) {
           // 避免兩隻怪物開頭字母一樣，不然打第一個字就分不出來
           const char* w = pool[random(poolN)];
@@ -61,7 +76,7 @@ struct DefenseApp : App {
             w = pool[random(poolN)];
           }
           strlcpy(m.w, w, 16);
-          m.x = 240; m.y = 64 + random(3) * 7; m.v = 7 + min(10.f, elapsed / 8) + random(300) / 100.f;
+          m.x = 240; m.lane = lane; m.labelW = textWidth(m.w, F_BODYB) + 6;
           m.big = strlen(w) > 7; m.alive = true;
           break;
         }
@@ -69,16 +84,26 @@ struct DefenseApp : App {
       }
     }
     Mob* tg = target();
+    float v = 7 + min(10.f, elapsed / 8);
+    // 先畫怪物，再畫字牌，字牌永遠在最上面
     for (auto& m : mobs) {
       if (!m.alive) continue;
-      if (!over) m.x -= m.v * dt;
-      sprite(m.big ? S_OGRE : S_ZOMBIE, 8 + ((int)(t * 6)) % 4, (int)m.x, m.y, 2, FLIP);
-      int ww = textWidth(m.w, F_BODYB) + 6, lx = (int)m.x + 16 - ww / 2;
-      R(lx, m.y - 13, ww, 12, &m == tg ? P::ink : P::panel);
+      if (!over) m.x -= v * dt;
+      sprite(m.big ? S_OGRE : S_ZOMBIE, 8 + ((int)(t * 6)) % 4, (int)m.x, mobY(m), 2, FLIP);
+    }
+    for (auto& m : mobs) {
+      if (!m.alive) continue;
+      int ly = 30 + m.lane * 13, cx = (int)m.x + 16, lx = cx - m.labelW / 2;
+      cv.drawFastVLine(cx, ly + 2, mobY(m) - ly - 2, &m == tg ? P::amber : P::line);
+      R(lx, ly - 10, m.labelW, 12, &m == tg ? P::ink : P::panel);
       if (&m == tg) {
-        int a = text(typed, lx + 3, m.y - 3, P::amber, F_BODYB);
-        text(m.w + strlen(typed), lx + 3 + a, m.y - 3, P::text, F_BODYB);
-      } else text(m.w, lx + 3, m.y - 3, P::text, F_BODYB);
+        R(lx, ly + 1, m.labelW, 1, P::amber);
+        int a = text(typed, lx + 3, ly, P::amber, F_BODYB);
+        text(m.w + strlen(typed), lx + 3 + a, ly, P::text, F_BODYB);
+      } else text(m.w, lx + 3, ly, P::text, F_BODYB);
+    }
+    for (auto& m : mobs) {
+      if (!m.alive) continue;
       if (m.x < 30 && !over) {
         m.alive = false; hp--; blip(180, 200);
         if (&m == tg) typed[0] = 0;
@@ -120,7 +145,7 @@ struct DefenseApp : App {
     if (!strcmp(m->w, typed)) {
       int pts = strlen(m->w) * 10;
       score += pts; m->alive = false; typed[0] = 0; blip(1500, 50);
-      for (auto& f : fx) if (f.life <= 0) { f = {m->x + 10, (float)m->y - 4, 1, pts}; break; }
+      for (auto& f : fx) if (f.life <= 0) { f = {m->x + 10, (float)mobY(*m) - 4, 1, pts}; break; }
     }
   }
 } defenseApp;

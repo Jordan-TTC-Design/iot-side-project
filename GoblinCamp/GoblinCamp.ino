@@ -12,11 +12,16 @@
 #include "input.h"
 #include "store.h"
 #include "camp.h"
+#include "net.h"
+#include "audio.h"
 #include "app.h"
 #include "app_home.h"
 #include "app_vocab.h"
 #include "app_defense.h"
 #include "app_settings.h"
+#include "app_remote.h"
+#include "app_claude.h"
+#include "app_news.h"
 #include "serial_sd.h"
 
 void blip(int freq, int ms) {
@@ -39,6 +44,8 @@ void setup() {
   campInit();
   randomSeed(esp_random());
 
+  setenv("TZ", "CST-8", 1);   // 開機就用台灣時間；RTC 在 reset 後還留著上次對時的時間
+  tzset();
   loadSettings();
   applySettings();
   sdBegin();
@@ -58,6 +65,8 @@ void loop() {
   M5Cardputer.update();
   wifiTick();
   serialTick();
+  usage.tick();
+  speech.tick();
   pollKeys(cur->textMode());
 
   // 關螢幕時，第一個按鍵只負責叫醒
@@ -70,6 +79,7 @@ void loop() {
   uint32_t idle = millis() - lastInput;
   if (curId == A_HOME && cfg.idleClock && idle > 45000) go(A_CLOCK);
   uint32_t off = SLEEP_MS[cfg.sleep];
+  if (curId == A_CLOCK && cfg.clockAwake) off = 0;   // 營火時鐘可以設成常亮
   if (off && idle > off) {
     screenOff = true;
     vocab.save();

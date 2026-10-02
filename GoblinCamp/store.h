@@ -7,9 +7,14 @@ struct Settings {
   uint8_t bright = 7;     // 1–10
   uint8_t sleep = 1;      // 自動關螢幕：0=30 秒 1=1 分 2=5 分 3=永不
   bool idleClock = true;  // 主選單閒置 45 秒切到營火時鐘
+  bool clockAwake = false; // 營火時鐘畫面不自動關螢幕（在時鐘按 Space 切換）
   uint8_t level = 3;      // 目前背的級數（3–6）
   uint8_t unlocked = 3;   // 已解鎖到第幾級；往上要通過跳級測驗
   uint8_t acBrand = 1;    // 冷氣品牌：0 日立 1 大金 2 國際牌 3 三菱
+  uint8_t acModel = 0;    // 同品牌的第幾種協定（試到有反應的那個）
+  bool acPower = false;
+  uint8_t acTemp = 26, acMode = 0, acFan = 0;  // 模式：冷氣 除濕 送風 暖氣 自動；風速：自動 低 中 高
+  bool acSwing = true;
   String ssid, pass;
 } cfg;
 Preferences prefs;
@@ -21,9 +26,16 @@ void loadSettings() {
   cfg.bright = prefs.getUChar("bright", cfg.bright);
   cfg.sleep = prefs.getUChar("sleep", cfg.sleep);
   cfg.idleClock = prefs.getBool("idleClock", cfg.idleClock);
+  cfg.clockAwake = prefs.getBool("clockAwake", cfg.clockAwake);
   cfg.level = prefs.getUChar("level", cfg.level);
   cfg.unlocked = prefs.getUChar("unlocked", cfg.unlocked);
   cfg.acBrand = prefs.getUChar("acBrand", cfg.acBrand);
+  cfg.acModel = prefs.getUChar("acModel", cfg.acModel);
+  cfg.acPower = prefs.getBool("acPower", cfg.acPower);
+  cfg.acTemp = prefs.getUChar("acTemp", cfg.acTemp);
+  cfg.acMode = prefs.getUChar("acMode", cfg.acMode);
+  cfg.acFan = prefs.getUChar("acFan", cfg.acFan);
+  cfg.acSwing = prefs.getBool("acSwing", cfg.acSwing);
   cfg.ssid = prefs.getString("ssid", "");
   cfg.pass = prefs.getString("pass", "");
 }
@@ -32,9 +44,16 @@ void saveSettings() {
   prefs.putUChar("bright", cfg.bright);
   prefs.putUChar("sleep", cfg.sleep);
   prefs.putBool("idleClock", cfg.idleClock);
+  prefs.putBool("clockAwake", cfg.clockAwake);
   prefs.putUChar("level", cfg.level);
   prefs.putUChar("unlocked", cfg.unlocked);
   prefs.putUChar("acBrand", cfg.acBrand);
+  prefs.putUChar("acModel", cfg.acModel);
+  prefs.putBool("acPower", cfg.acPower);
+  prefs.putUChar("acTemp", cfg.acTemp);
+  prefs.putUChar("acMode", cfg.acMode);
+  prefs.putUChar("acFan", cfg.acFan);
+  prefs.putBool("acSwing", cfg.acSwing);
   prefs.putString("ssid", cfg.ssid);
   prefs.putString("pass", cfg.pass);
 }

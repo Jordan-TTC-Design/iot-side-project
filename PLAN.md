@@ -116,6 +116,7 @@ Cardputer ADV 的主介面：開機看到哥布林營地，左邊營地、右邊
 ---
 
 ## 之後可以考慮
+- **Spotify 正在播放**（2026-10-02 提出）：橋接程式用 AppleScript 控制 Mac 上的 Spotify App（不用 API 金鑰、不用 Premium），提供歌名、歌手、進度、專輯封面（縮成 32×32 像素風）；Cardputer 上做唱片機動畫，‹ › 上一首／下一首、Enter 暫停
 - 對講機模式問 Claude：麥克風錄音 → Mac 用 Whisper 轉文字 → Claude → 答案顯示在螢幕上
 - 發音練習：念一個單字，用 Whisper 辨識，判斷念得對不對
 - Claude Code 的允許／拒絕按鈕：接哥布林營地 server 的 `/claude/asks`、`/answer`
@@ -139,9 +140,17 @@ python3 tools/sd_put.py sd/goblin/vocab.tsv   # 透過 USB 寫進 SD 卡，不�
   `esptool --chip esp32s3 -p /dev/cu.usbmodem1101 write-flash 0 backup/cardputer-launcher-2026-10-02.bin`
 - 字型：英文和 KK 用 Noto Sans 轉的 VLW 反鋸齒字型；中文用 M5GFX 內建的 efontTW_12（KK 符號它沒有，所以要分開）。6000 字的中文只有「〇」缺字
 - v0.1 有：主選單＋營地動畫、英語單字（Leitner、進度存在 SD 卡）、守城打字、營火時鐘、設定（音量、亮度、自動關螢幕、Wi-Fi 掃描連線、NTP 對時）
-- 新聞、Claude 額度、遙控器目前是占位頁
+- 遙控器：IRremoteESP8266 2.9.0（`IRac`）。冷氣每個品牌有好幾種協定，在「型號」列一個一個試；LG 電視用 NEC 碼，直接按鍵模式（方向鍵＝電視方向鍵，p 電源、m 靜音、i 輸入、h Home、= - 音量、] [ 頻道、b 返回）
+- 營火時鐘按 Space 切換常亮（不自動關螢幕）
+- 守城打字的字牌分 4 條軌道，不會互相蓋住
+- **Mac 橋接**（`tools/bridge.py`，port 8787，Bonjour `_goblin._tcp`）：`/usage.txt` 額度、`/news.tsv` 新聞包（超過 6 小時自動重抓）
+- **Claude 額度不碰 token**：Claude Code 的狀態列本來就會收到 `rate_limits`（five_hour／seven_day 的 used_percentage、resets_at）。`tools/goblin_statusline.py` 夾在中間存一份到 `~/.goblin/usage/<帳號>.json`，再交給原本的 ccstatusline。只在用 Claude Code 時更新
+- 新聞：`tools/build_news.py` 不用 Claude 挑字；Cardputer 上 Tab 從橋接程式更新，Enter 把字加進單字卡，Space 念句子
+- **發音**：單字卡 Enter 念單字、Tab 念句子。Mac 的 `say`（Samantha）產生 8-bit 11025Hz PCM；機器先找 SD 卡 `/goblin/audio/{w,s,n}/`，沒有就向橋接程式 `/tts` 要，邊下載邊存進 SD 卡，從 SD 卡串流播放（沒有 PSRAM，3 塊 4KB 輪流）。想離線用，`tools/build_audio.py 3` 一次產生整級，用讀卡機複製
 - 待做：背單字的間隔要用日期（現在只照這一輪排序）；跳級測驗；vocab.tsv 換版時舊進度會錯位（之後改成用單字當 key）
 
 ## 進度紀錄
 - **2026-10-02**：討論方向；找到 6000 字表；驗證 CMU → KK 轉換可行；實測 RSS 來源（VOA、CNN 已停更，改用 NPR、BBC）；不用 Claude 從新聞挑字可行；開始做 HTML 介面原型；HTML 原型 v1 完成（8 個畫面都可以操作）
 - **2026-10-02（下午）**：韌體 v0.1 編譯通過；備份整份 flash；SD 傳檔工具
+- **2026-10-02（晚上）**：遙控器、營火時鐘常亮、守城字牌分軌、Mac 橋接、Claude 額度、新聞 app（編譯通過，等實機測試）
+- **2026-10-02（晚上）**：實機驗證遙控器版面、新聞、Claude 額度（mDNS 找到橋接程式）、發音（下載、存 SD、串流播放）
